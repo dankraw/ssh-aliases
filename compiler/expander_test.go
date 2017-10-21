@@ -5,7 +5,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_ShouldExpandHostname(t *testing.T) {
+func TestShouldExpandHostname(t *testing.T) {
 	t.Parallel()
 	// given
 	hostname := "x-master[1..3].myproj-prod.dc1.net"
@@ -22,7 +22,7 @@ func Test_ShouldExpandHostname(t *testing.T) {
 	}, hostnames)
 }
 
-func Test_ShouldExpandHostnameWithMultipleRanges(t *testing.T) {
+func TestShouldExpandHostnameWithMultipleRanges(t *testing.T) {
 	t.Parallel()
 	// given
 	hostname := "x-master[1..3].myproj-prod.dc[1..2].net"

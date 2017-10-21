@@ -34,7 +34,7 @@ func TestCompile(t *testing.T) {
 	assert.Equal(t, "test-slave1", results[1].Host)
 }
 
-func Test_ShouldReplaceAllGroupMatchOccurrences(t *testing.T) {
+func TestShouldReplaceAllGroupMatchOccurrences(t *testing.T) {
 	t.Parallel()
 
 	// given
@@ -57,7 +57,7 @@ func Test_ShouldReplaceAllGroupMatchOccurrences(t *testing.T) {
 }
 
 
-func Test_ShouldExpandHostnameWithProvidedRange(t *testing.T) {
+func TestShouldExpandHostnameWithProvidedRange(t *testing.T) {
 	t.Parallel()
 
 	// given

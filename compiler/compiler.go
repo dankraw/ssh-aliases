@@ -1,40 +1,29 @@
-package main
+package compiler
 
 import (
 	"fmt"
-	"regexp"
 	"strings"
+	. "github.com/dankraw/ssh-aliases/domain"
 )
 
-type HostConfigInput struct {
-	Hostnames []string
-	HostnameRegexp *regexp.Regexp
-	TargetPatternTemplate string
-	HostConfig *HostConfig
+type Compiler struct {}
+
+func New() *Compiler {
+	return &Compiler{}
 }
 
-type HostConfig struct {
-	IdentityFile string
-	Port uint16
-}
-
-type HostConfigResult struct {
-	Host string
-	HostConfig *HostConfig
-}
-
-func compile(input HostConfigInput) ([]HostConfigResult, error) {
+func (c *Compiler) Compile(input HostConfigInput) ([]HostConfigResult, error) {
 	results := []HostConfigResult{}
 	for _, host := range input.Hostnames {
 		results = append(results, HostConfigResult{
-			Host: compileToTargetHost(input, host),
+			Host: c.compileToTargetHost(input, host),
 			HostConfig: input.HostConfig,
 		})
 	}
 	return results, nil
 }
 
-func compileToTargetHost(input HostConfigInput, host string) string {
+func (c *Compiler) compileToTargetHost(input HostConfigInput, host string) string {
 	found := input.HostnameRegexp.FindStringSubmatch(host)
 	target := input.TargetPatternTemplate
 	for i, group := range found {

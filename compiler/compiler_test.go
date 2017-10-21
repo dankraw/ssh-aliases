@@ -1,9 +1,10 @@
-package main
+package compiler
 
 import (
 	"regexp"
 	"testing"
 	"github.com/stretchr/testify/assert"
+	. "github.com/dankraw/ssh-aliases/domain"
 )
 
 func TestCompile(t *testing.T) {
@@ -24,7 +25,7 @@ func TestCompile(t *testing.T) {
 	}
 
 	// when
-	results, err := compile(input)
+	results, err := New().Compile(input)
 
 	// then
 	assert.NoError(t, err)
@@ -50,7 +51,7 @@ func Test_ShouldReplaceAllGroupMatchOccurrences(t *testing.T) {
 	}
 
 	// when
-	results, err := compile(input)
+	results, err := New().Compile(input)
 
 	// then
 	assert.NoError(t, err)

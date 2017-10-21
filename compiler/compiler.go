@@ -6,19 +6,29 @@ import (
 	. "github.com/dankraw/ssh-aliases/domain"
 )
 
-type Compiler struct {}
+type Compiler struct {
+	expander *Expander
+}
 
-func New() *Compiler {
-	return &Compiler{}
+func NewCompiler() *Compiler {
+	return &Compiler{
+		NewExpander(),
+	}
 }
 
 func (c *Compiler) Compile(input HostConfigInput) ([]HostConfigResult, error) {
 	results := []HostConfigResult{}
 	for _, host := range input.Hostnames {
-		results = append(results, HostConfigResult{
-			Host: c.compileToTargetHost(input, host),
-			HostConfig: input.HostConfig,
-		})
+		expanded, err := c.expander.expand(host)
+		if err != nil {
+			return nil, err
+		}
+		for _, h := range expanded {
+			results = append(results, HostConfigResult{
+				Host: c.compileToTargetHost(input, h),
+				HostConfig: input.HostConfig,
+			})
+		}
 	}
 	return results, nil
 }
@@ -32,3 +42,4 @@ func (c *Compiler) compileToTargetHost(input HostConfigInput, host string) strin
 	}
 	return target
 }
+

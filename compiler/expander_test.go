@@ -22,6 +22,19 @@ func TestShouldExpandHostname(t *testing.T) {
 	}, hostnames)
 }
 
+func TestShouldReturnErrorOnInvalidRange(t *testing.T) {
+	t.Parallel()
+	// given
+	hostname := "x-master[120..13].myproj-prod.dc1.net"
+
+	// when
+	_, err := NewExpander().expand(hostname)
+
+	// then
+	assert.Error(t, err)
+	assert.Equal(t, "Invalid range: 120 is not smaller than 13", err.Error())
+}
+
 func TestShouldExpandHostnameWithMultipleRanges(t *testing.T) {
 	t.Parallel()
 	// given

@@ -12,7 +12,7 @@ type Expander struct {
 }
 
 func NewExpander() *Expander {
-	rangeRegexp, _ := regexp.Compile("\\[(\\d)..(\\d)\\]")
+	rangeRegexp, _ := regexp.Compile("\\[(\\d+)\\.\\.(\\d+)\\]")
 	return &Expander{
 		rangeRegexp: rangeRegexp,
 	}
@@ -57,7 +57,7 @@ func (e *Expander) expandWithNextRangeFound(host string) ([]string, error) {
 			}
 			return hostnames, nil
 		} else {
-			return nil, errors.New(fmt.Sprintf("Invalid range: %v should be smaller than %v", begin, end))
+			return nil, errors.New(fmt.Sprintf("Invalid range: %v is not smaller than %v", begin, end))
 		}
 	}
 	return []string{host}, nil

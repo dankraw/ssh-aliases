@@ -5,37 +5,51 @@ import (
 	"fmt"
 	"strconv"
 	"errors"
+	"strings"
 )
 
 type Expander struct {
 	rangeRegexp *regexp.Regexp
+	variationRegexp *regexp.Regexp
 }
 
 func NewExpander() *Expander {
-	rangeRegexp, _ := regexp.Compile("\\[(\\d+)\\.\\.(\\d+)\\]")
 	return &Expander{
-		rangeRegexp: rangeRegexp,
+		rangeRegexp:     regexp.MustCompile("\\[(\\d+)\\.\\.(\\d+)\\]"),
+		variationRegexp: regexp.MustCompile("\\[([a-zA-Z0-9-.|]+)\\]"),
 	}
 }
 
 func (e *Expander) expand(host string) ([]string, error) {
-	hostnames := []string{host}
+	hostnames, err := e.expandWithFunction([]string{host}, e.expandWithNextRangeFound)
+	if err != nil {
+		return nil, err
+	}
+	hostnames, err = e.expandWithFunction(hostnames, e.expandWithNextVariationFound)
+	if err != nil {
+		return nil, err
+	}
+	return hostnames, nil
+}
+
+func (e *Expander) expandWithFunction(hostnames []string, expandWith func (string) ([]string, error)) ([]string, error) {
 	tryExpanding := true
+	expanded := hostnames
 	for tryExpanding {
 		nextIterationHostnames := []string{}
-		for i := 0; i < len(hostnames); i++ {
-			expanded, err := e.expandWithNextRangeFound(hostnames[i])
+		for i := 0; i < len(expanded); i++ {
+			expanded, err := expandWith(expanded[i])
 			if err != nil {
 				return nil, err
 			}
 			nextIterationHostnames = append(nextIterationHostnames, expanded...)
 		}
-		if len(hostnames) >= len(nextIterationHostnames) {
+		if len(expanded) >= len(nextIterationHostnames) {
 			tryExpanding = false
 		}
-		hostnames = nextIterationHostnames
+		expanded = nextIterationHostnames
 	}
-	return hostnames, nil
+	return expanded, nil
 }
 
 func (e *Expander) expandWithNextRangeFound(host string) ([]string, error) {
@@ -61,5 +75,19 @@ func (e *Expander) expandWithNextRangeFound(host string) ([]string, error) {
 		}
 	}
 	return []string{host}, nil
+}
+
+func (e *Expander) expandWithNextVariationFound(host string) ([]string, error) {
+	group := e.variationRegexp.FindStringSubmatchIndex(host)
+	if len(group) < 1 {
+		return []string{host}, nil
+	}
+	variations := strings.Split(host[group[2]:group[3]], "|")
+	hostnames := []string{}
+	for _, v := range variations {
+		expanded := fmt.Sprintf("%s%v%s", host[0:group[0]], v, host[group[1]:])
+		hostnames = append(hostnames, expanded)
+	}
+	return hostnames, nil
 }
 

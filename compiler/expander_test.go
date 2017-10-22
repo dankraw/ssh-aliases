@@ -5,7 +5,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestShouldExpandHostname(t *testing.T) {
+func TestShouldNotExpandForNoOperators(t *testing.T) {
+	t.Parallel()
+	// given
+	hostname := "x-master1.myproj-prod.dc1.net"
+
+	// when
+	hostnames, err := NewExpander().expand(hostname)
+
+	// then
+	assert.NoError(t, err)
+	assert.Equal(t, []string{
+		"x-master1.myproj-prod.dc1.net",
+	}, hostnames)
+}
+
+func TestShouldExpandHostnameWithRange(t *testing.T) {
 	t.Parallel()
 	// given
 	hostname := "x-master[1..3].myproj-prod.dc1.net"
@@ -54,3 +69,39 @@ func TestShouldExpandHostnameWithMultipleRanges(t *testing.T) {
 		"x-master3.myproj-prod.dc2.net",
 	}, hostnames)
 }
+
+func TestShouldExpandHostnameWithVariations(t *testing.T) {
+	t.Parallel()
+	// given
+	hostname := "server-[prod|test|dev].myproj.net"
+
+	// when
+	hostnames, err := NewExpander().expand(hostname)
+
+	// then
+	assert.NoError(t, err)
+	assert.Equal(t, []string{
+		"server-prod.myproj.net",
+		"server-test.myproj.net",
+		"server-dev.myproj.net",
+	}, hostnames)
+}
+
+func TestShouldExpandHostnameWithRangesAndVariations(t *testing.T) {
+	t.Parallel()
+	// given
+	hostname := "host[1..2].server-[prod|test].myproj.net"
+
+	// when
+	hostnames, err := NewExpander().expand(hostname)
+
+	// then
+	assert.NoError(t, err)
+	assert.Equal(t, []string{
+		"host1.server-prod.myproj.net",
+		"host1.server-test.myproj.net",
+		"host2.server-prod.myproj.net",
+		"host2.server-test.myproj.net",
+	}, hostnames)
+}
+

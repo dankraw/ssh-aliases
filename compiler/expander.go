@@ -53,28 +53,27 @@ func (e *Expander) expandWithFunction(hostnames []string, expandWith func (strin
 }
 
 func (e *Expander) expandWithNextRangeFound(host string) ([]string, error) {
-	idx := e.rangeRegexp.FindAllStringSubmatchIndex(host, -1)
-	for _, group := range idx {
-		begin, err := strconv.Atoi(host[group[2]:group[3]])
-		if err != nil {
-			return nil, err
-		}
-		end, err := strconv.Atoi(host[group[4]:group[5]])
-		if err != nil {
-			return nil, err
-		}
-		if begin < end {
-			hostnames := []string{}
-			for i := begin; i <= end; i++ {
-				expanded := fmt.Sprintf("%s%v%s", host[0:group[0]], i, host[group[1]:])
-				hostnames = append(hostnames, expanded)
-			}
-			return hostnames, nil
-		} else {
-			return nil, errors.New(fmt.Sprintf("Invalid range: %v is not smaller than %v", begin, end))
-		}
+	group := e.rangeRegexp.FindStringSubmatchIndex(host)
+	if len(group) < 1 {
+		return []string{host}, nil
 	}
-	return []string{host}, nil
+	begin, err := strconv.Atoi(host[group[2]:group[3]])
+	if err != nil {
+		return nil, err
+	}
+	end, err := strconv.Atoi(host[group[4]:group[5]])
+	if err != nil {
+		return nil, err
+	}
+	if begin < end {
+		hostnames := []string{}
+		for i := begin; i <= end; i++ {
+			expanded := fmt.Sprintf("%s%v%s", host[0:group[0]], i, host[group[1]:])
+			hostnames = append(hostnames, expanded)
+		}
+		return hostnames, nil
+	}
+	return nil, errors.New(fmt.Sprintf("Invalid range: %v is not smaller than %v", begin, end))
 }
 
 func (e *Expander) expandWithNextVariationFound(host string) ([]string, error) {

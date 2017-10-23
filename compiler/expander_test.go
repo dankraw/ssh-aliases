@@ -62,11 +62,26 @@ func TestShouldExpandHostnameWithMultipleRanges(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, []string{
 		"x-master1.myproj-prod.dc1.net",
-		"x-master1.myproj-prod.dc2.net",
 		"x-master2.myproj-prod.dc1.net",
-		"x-master2.myproj-prod.dc2.net",
 		"x-master3.myproj-prod.dc1.net",
+		"x-master1.myproj-prod.dc2.net",
+		"x-master2.myproj-prod.dc2.net",
 		"x-master3.myproj-prod.dc2.net",
+	}, hostnames)
+}
+
+func TestShouldReturnErrorForSingleVariation(t *testing.T) {
+	t.Parallel()
+	// given
+	hostname := "server-[prod].myproj.net"
+
+	// when
+	hostnames, err := NewExpander().expand(hostname)
+
+	// then
+	assert.NoError(t, err)
+	assert.Equal(t, []string{
+		"server-prod.myproj.net",
 	}, hostnames)
 }
 
@@ -90,7 +105,7 @@ func TestShouldExpandHostnameWithVariations(t *testing.T) {
 func TestShouldExpandHostnameWithRangesAndVariations(t *testing.T) {
 	t.Parallel()
 	// given
-	hostname := "host[1..2].server-[prod|test].myproj.net"
+	hostname := "host[1..2].server-[prod|test].myproj[5..6].net"
 
 	// when
 	hostnames, err := NewExpander().expand(hostname)
@@ -98,10 +113,14 @@ func TestShouldExpandHostnameWithRangesAndVariations(t *testing.T) {
 	// then
 	assert.NoError(t, err)
 	assert.Equal(t, []string{
-		"host1.server-prod.myproj.net",
-		"host1.server-test.myproj.net",
-		"host2.server-prod.myproj.net",
-		"host2.server-test.myproj.net",
+		"host1.server-prod.myproj5.net",
+		"host2.server-prod.myproj5.net",
+		"host1.server-test.myproj5.net",
+		"host2.server-test.myproj5.net",
+		"host1.server-prod.myproj6.net",
+		"host2.server-prod.myproj6.net",
+		"host1.server-test.myproj6.net",
+		"host2.server-test.myproj6.net",
 	}, hostnames)
 }
 

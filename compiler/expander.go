@@ -12,12 +12,14 @@ import (
 type Expander struct {
 	rangeRegexp *regexp.Regexp
 	variationRegexp *regexp.Regexp
+	hostnameRegexp *regexp.Regexp
 }
 
 func NewExpander() *Expander {
 	return &Expander{
 		rangeRegexp:     regexp.MustCompile("\\[(\\d+)\\.\\.(\\d+)\\]"),
 		variationRegexp: regexp.MustCompile("\\[([a-zA-Z0-9-|]+(?:\\.[a-zA-Z0-9-|]+)*)+\\]"),
+		hostnameRegexp: regexp.MustCompile("^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9])(\\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]))*$"),
 	}
 }
 
@@ -94,6 +96,9 @@ func (e *Expander) expand(host string) ([]string, error) {
 			} else {
 				produced += host[r.endIdx:]
 			}
+		}
+		if !e.hostnameRegexp.MatchString(produced) {
+			return nil, errors.New(fmt.Sprintf("Produced string '%v' is not a valid hostname", produced))
 		}
 		hostnames = append(hostnames, produced)
 	}

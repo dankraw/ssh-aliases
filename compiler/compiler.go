@@ -26,6 +26,7 @@ func (c *Compiler) Compile(input HostConfigInput) ([]HostConfigResult, error) {
 		for _, h := range expanded {
 			results = append(results, HostConfigResult{
 				Host: c.compileToTargetHost(input, h),
+				HostName: h,
 				HostConfig: input.HostConfig,
 			})
 		}

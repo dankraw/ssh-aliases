@@ -16,5 +16,6 @@ type HostConfig struct {
 
 type HostConfigResult struct {
 	Host string
+	HostName string
 	HostConfig *HostConfig
 }

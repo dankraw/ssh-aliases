@@ -50,6 +50,19 @@ func TestShouldReturnErrorOnInvalidRange(t *testing.T) {
 	assert.Equal(t, "Invalid range: 120 is not smaller than 13", err.Error())
 }
 
+func TestShouldReturnErrorWhenProducedStringIsNotAValidHostname(t *testing.T) {
+	t.Parallel()
+	// given
+	hostname := "--ddd--[1..2]..."
+
+	// when
+	_, err := NewExpander().expand(hostname)
+
+	// then
+	assert.Error(t, err)
+	assert.Equal(t, "Produced string '--ddd--1...' is not a valid hostname", err.Error())
+}
+
 func TestShouldExpandHostnameWithMultipleRanges(t *testing.T) {
 	t.Parallel()
 	// given
@@ -82,6 +95,38 @@ func TestShouldReturnErrorForSingleVariation(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, []string{
 		"server-prod.myproj.net",
+	}, hostnames)
+}
+
+func TestShouldAllowVariationOnBeginningOfHostname(t *testing.T) {
+	t.Parallel()
+	// given
+	hostname := "[a|b]-server.myproj.net"
+
+	// when
+	hostnames, err := NewExpander().expand(hostname)
+
+	// then
+	assert.NoError(t, err)
+	assert.Equal(t, []string{
+		"a-server.myproj.net",
+		"b-server.myproj.net",
+	}, hostnames)
+}
+
+func TestShouldAllowVariationOnEndingOfHostname(t *testing.T) {
+	t.Parallel()
+	// given
+	hostname := "server.myproj.[net|com]"
+
+	// when
+	hostnames, err := NewExpander().expand(hostname)
+
+	// then
+	assert.NoError(t, err)
+	assert.Equal(t, []string{
+		"server.myproj.net",
+		"server.myproj.com",
 	}, hostnames)
 }
 

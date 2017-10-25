@@ -10,7 +10,7 @@ import (
 
 const fixtureDir = "./test-fixtures"
 
-func TestShouldLoadConfiguration(t *testing.T) {
+func TestShouldDecodeConfig(t *testing.T) {
 	// given
 	data, _ := ioutil.ReadFile(filepath.Join(fixtureDir, "example.hcl"))
 
@@ -19,22 +19,23 @@ func TestShouldLoadConfiguration(t *testing.T) {
 
 	// then
 	assert.Equal(t, Config{
-		Aliases: []Alias {{
-			Name:          "hermes-frontend",
-			Patterns:      []string{"host[1..5].example.com"},
-			RegExp:        "(host\\d+)",
-			Template:      "%1",
-			SSHConfigName: "private",
+		Aliases: []Alias{{
+			Name:          "service-a",
+			Pattern:       "service-a[1..5].example.com",
+			Template:      "a%1",
+			SSHConfigName: "service-a",
 		}, {
-			Name:          "hermes-consumers",
-			Patterns:      []string{"host[1..3].example.com"},
-			RegExp:        "(host\\d+)",
-			Template:      "%1",
-			SSHConfigName: "private",
+			Name:     "service-b",
+			Pattern:  "service-b[1..2].example.com",
+			Template: "b%1",
+			SSHConfig: EmbeddedSSHConfig{
+				IdentityFile: "b_id_rsa.pub",
+				Port:         22,
+			},
 		}}, SSHConfigs: []SSHConfig{{
-			Name: "private",
-			IdentityFile: "id_rsa.pub",
-			Port: 22,
+			Name:         "service-a",
+			IdentityFile: "a_id_rsa.pub",
+			Port:         22,
 		}},
 	}, config)
 }

@@ -1,27 +1,22 @@
 package compiler
 
 import (
-	"regexp"
-	"testing"
-	"github.com/stretchr/testify/assert"
 	. "github.com/dankraw/ssh-aliases/domain"
+	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestCompile(t *testing.T) {
 	t.Parallel()
 
 	// given
-	r, _ := regexp.Compile("x-([a-z]+\\d+)\\.myproj\\-([a-z]+)\\.dc\\d+\\.net")
-	input := HostConfigInput {
-		Hostnames: []string{
-			"x-master1.myproj-prod.dc1.net",
-			"x-slave1.myproj-test.dc2.net",
-		},
-		HostnameRegexp: r,
-		TargetPatternTemplate: "%2-%1",
-		HostConfig: &HostConfig{
-			IdentityFile: "~/.ssh/id_rsa",
-		},
+	sshConfig := HostConfig{
+		IdentityFile: "~/.ssh/id_rsa",
+	}
+	input := HostConfigInput{
+		HostnamePattern: "x-master[1..2].myproj-prod.dc1.net",
+		AliasTemplate:   "host%1-dc1",
+		HostConfig:      sshConfig,
 	}
 
 	// when
@@ -29,23 +24,24 @@ func TestCompile(t *testing.T) {
 
 	// then
 	assert.NoError(t, err)
-	assert.Len(t, results, 2)
-	assert.Equal(t, "prod-master1", results[0].Host)
-	assert.Equal(t, "x-master1.myproj-prod.dc1.net", results[0].HostName)
-	assert.Equal(t, "test-slave1", results[1].Host)
+	assert.Equal(t, []HostConfigResult{{
+		Host:       "host1-dc1",
+		HostName:   "x-master1.myproj-prod.dc1.net",
+		HostConfig: sshConfig,
+	}, {
+		Host:       "host2-dc1",
+		HostName:   "x-master2.myproj-prod.dc1.net",
+		HostConfig: sshConfig,
+	}}, results)
 }
 
 func TestShouldReplaceAllGroupMatchOccurrences(t *testing.T) {
 	t.Parallel()
 
 	// given
-	r, _ := regexp.Compile("x-([a-z]+\\d+)\\.myproj\\-prod\\.dc\\d+\\.net")
-	input := HostConfigInput {
-		Hostnames: []string{
-			"x-master1.myproj-prod.dc1.net",
-		},
-		HostnameRegexp: r,
-		TargetPatternTemplate: "%1-%1-%1",
+	input := HostConfigInput{
+		HostnamePattern: "x-[master1].myproj-prod.dc1.net",
+		AliasTemplate:   "%1-%1-%1",
 	}
 
 	// when
@@ -57,18 +53,13 @@ func TestShouldReplaceAllGroupMatchOccurrences(t *testing.T) {
 	assert.Equal(t, "master1-master1-master1", results[0].Host)
 }
 
-
 func TestShouldExpandHostnameWithProvidedRange(t *testing.T) {
 	t.Parallel()
 
 	// given
-	r, _ := regexp.Compile("x-([a-z]+\\d+).*")
-	input := HostConfigInput {
-		Hostnames: []string{
-			"x-master[4..6].myproj-prod.dc1.net",
-		},
-		HostnameRegexp: r,
-		TargetPatternTemplate: "%1",
+	input := HostConfigInput{
+		HostnamePattern: "x-master[4..6].myproj-prod.dc1.net",
+		AliasTemplate:   "m%1",
 	}
 
 	// when
@@ -76,12 +67,15 @@ func TestShouldExpandHostnameWithProvidedRange(t *testing.T) {
 
 	// then
 	assert.NoError(t, err)
-	assert.Len(t, results, 3)
-	assert.Equal(t, "master4", results[0].Host)
-	assert.Equal(t, "x-master4.myproj-prod.dc1.net", results[0].HostName)
-	assert.Equal(t, "master5", results[1].Host)
-	assert.Equal(t, "x-master5.myproj-prod.dc1.net", results[1].HostName)
-	assert.Equal(t, "master6", results[2].Host)
-	assert.Equal(t, "x-master6.myproj-prod.dc1.net", results[2].HostName)
+	assert.Equal(t, []HostConfigResult{{
+		Host:     "m4",
+		HostName: "x-master4.myproj-prod.dc1.net",
+	}, {
+		Host:     "m5",
+		HostName: "x-master5.myproj-prod.dc1.net",
+	}, {
+		Host:     "m6",
+		HostName: "x-master6.myproj-prod.dc1.net",
+	}}, results)
 
 }

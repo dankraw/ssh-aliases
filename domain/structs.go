@@ -1,21 +1,18 @@
 package domain
 
-import "regexp"
-
 type HostConfigInput struct {
-	Hostnames []string
-	HostnameRegexp *regexp.Regexp
-	TargetPatternTemplate string
-	HostConfig *HostConfig
+	HostnamePattern string
+	AliasTemplate   string
+	HostConfig      HostConfig
 }
 
 type HostConfig struct {
 	IdentityFile string
-	Port uint16
+	Port         int
 }
 
 type HostConfigResult struct {
-	Host string
-	HostName string
-	HostConfig *HostConfig
+	Host       string
+	HostName   string
+	HostConfig HostConfig
 }

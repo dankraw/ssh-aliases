@@ -22,6 +22,7 @@ func TestShouldNotExpandForNoOperators(t *testing.T) {
 
 func TestShouldExpandHostnameWithRange(t *testing.T) {
 	t.Parallel()
+
 	// given
 	hostname := "x-master[1..3].myproj-prod.dc1.net"
 
@@ -44,6 +45,7 @@ func TestShouldExpandHostnameWithRange(t *testing.T) {
 
 func TestShouldReturnErrorOnInvalidRange(t *testing.T) {
 	t.Parallel()
+
 	// given
 	hostname := "x-master[120..13].myproj-prod.dc1.net"
 
@@ -57,6 +59,7 @@ func TestShouldReturnErrorOnInvalidRange(t *testing.T) {
 
 func TestShouldReturnErrorWhenProducedStringIsNotAValidHostname(t *testing.T) {
 	t.Parallel()
+
 	// given
 	hostname := "--ddd--[1..2]..."
 
@@ -101,6 +104,7 @@ func TestShouldExpandHostnameWithMultipleRanges(t *testing.T) {
 
 func TestShouldReturnErrorForSingleVariation(t *testing.T) {
 	t.Parallel()
+
 	// given
 	hostname := "server-[prod].myproj.net"
 
@@ -117,6 +121,7 @@ func TestShouldReturnErrorForSingleVariation(t *testing.T) {
 
 func TestShouldAllowVariationOnBeginningOfHostname(t *testing.T) {
 	t.Parallel()
+
 	// given
 	hostname := "[a|b]-server.myproj.net"
 
@@ -136,6 +141,7 @@ func TestShouldAllowVariationOnBeginningOfHostname(t *testing.T) {
 
 func TestShouldAllowVariationOnEndingOfHostname(t *testing.T) {
 	t.Parallel()
+
 	// given
 	hostname := "server.myproj.[net|com]"
 
@@ -155,6 +161,7 @@ func TestShouldAllowVariationOnEndingOfHostname(t *testing.T) {
 
 func TestShouldExpandHostnameWithVariations(t *testing.T) {
 	t.Parallel()
+
 	// given
 	hostname := "server-[prod|test|dev].myproj.net"
 
@@ -177,6 +184,7 @@ func TestShouldExpandHostnameWithVariations(t *testing.T) {
 
 func TestShouldExpandHostnameWithRangesAndVariations(t *testing.T) {
 	t.Parallel()
+
 	// given
 	hostname := "host[1..2].server-[prod|test].myproj[5..6].net"
 

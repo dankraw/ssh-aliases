@@ -131,4 +131,3 @@ func (e *Expander) expandedHostnames(size int, host string, ranges []ExpandingRa
 	}
 	return hostnames, nil
 }
-

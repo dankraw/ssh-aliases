@@ -7,6 +7,8 @@ import (
 )
 
 func TestShouldMapToHostConfigInputs(t *testing.T) {
+	t.Parallel()
+
 	// given
 	config := Config{
 		Aliases: []Alias{{
@@ -51,6 +53,8 @@ func TestShouldMapToHostConfigInputs(t *testing.T) {
 }
 
 func TestShouldReturnErrorOnNotFoundSSHConfig(t *testing.T) {
+	t.Parallel()
+
 	// given
 	config := Config{
 		Aliases: []Alias{{

@@ -11,6 +11,8 @@ import (
 const fixtureDir = "./test-fixtures"
 
 func TestShouldDecodeConfig(t *testing.T) {
+	t.Parallel()
+
 	// given
 	data, _ := ioutil.ReadFile(filepath.Join(fixtureDir, "example.hcl"))
 

@@ -1,12 +1,12 @@
 package config
 
 import (
-	"io/ioutil"
 	"fmt"
+	"io/ioutil"
 	"strings"
 )
 
-type Scanner struct {}
+type Scanner struct{}
 
 func NewScanner() *Scanner {
 	return &Scanner{}
@@ -28,6 +28,6 @@ func (s *Scanner) ScanDirectory(path string) ([]string, error) {
 	return hcls, nil
 }
 
-func (s* Scanner) ReadFile(path string) ([]byte, error) {
+func (s *Scanner) ReadFile(path string) ([]byte, error) {
 	return ioutil.ReadFile(path)
 }

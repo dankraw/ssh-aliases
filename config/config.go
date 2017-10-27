@@ -49,9 +49,18 @@ func (c *Config) ToHostConfigInputs() ([]HostConfigInput, error) {
 
 	namedConfigsMap := map[string]HostConfig{}
 	for _, named := range c.SSHConfigs {
+		if _, err := namedConfigsMap[named.Name]; err {
+			return nil, errors.New(fmt.Sprintf("Duplicate ssh-config with name %v", named.Name))
+		}
 		namedConfigsMap[named.Name] = named.ToHostConfig()
 	}
+
+	aliases := map[string]Alias{}
 	for _, a := range c.Aliases {
+		if _, err := aliases[a.Name]; err {
+			return nil, errors.New(fmt.Sprintf("Duplicate alias with name %v", a.Name))
+		}
+		aliases[a.Name] = a
 		input := HostConfigInput{
 			HostnamePattern: a.Pattern,
 			AliasTemplate:   a.Template,

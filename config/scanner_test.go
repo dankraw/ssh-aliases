@@ -1,12 +1,13 @@
 package config
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestShouldScanDir(t *testing.T) {
 	t.Parallel()
+
 	// given
 	scanner := NewScanner()
 

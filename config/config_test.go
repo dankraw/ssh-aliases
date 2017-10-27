@@ -73,3 +73,45 @@ func TestShouldReturnErrorOnNotFoundSSHConfig(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, "No ssh-config named this-does-not-exists found (used by service-a alias)", err.Error())
 }
+
+func TestShouldReturnErrorOnDuplicateSSHConfig(t *testing.T) {
+	t.Parallel()
+
+	// given
+	config := Config{
+		SSHConfigs: []SSHConfig{{
+			Name: "service-a",
+		}, {
+			Name: "service-a",
+		}},
+	}
+
+	// when
+	results, err := config.ToHostConfigInputs()
+
+	// then
+	assert.Nil(t, results)
+	assert.Error(t, err)
+	assert.Equal(t, "Duplicate ssh-config with name service-a", err.Error())
+}
+
+func TestShouldReturnErrorOnDuplicateAlias(t *testing.T) {
+	t.Parallel()
+
+	// given
+	config := Config{
+		Aliases: []Alias{{
+			Name: "service-a",
+		}, {
+			Name: "service-a",
+		}},
+	}
+
+	// when
+	results, err := config.ToHostConfigInputs()
+
+	// then
+	assert.Nil(t, results)
+	assert.Error(t, err)
+	assert.Equal(t, "Duplicate alias with name service-a", err.Error())
+}

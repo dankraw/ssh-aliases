@@ -1,25 +1,21 @@
 package config
 
 import (
-	"io/ioutil"
-	"path/filepath"
-	"testing"
-
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
-const fixtureDir = "./test-fixtures"
-
-func TestShouldDecodeConfig(t *testing.T) {
+func TestShouldReadCompleteConfigFromDir(t *testing.T) {
 	t.Parallel()
 
 	// given
-	data, _ := ioutil.ReadFile(filepath.Join(fixtureDir, "example.hcl"))
+	reader := NewReader()
 
 	// when
-	config, _ := NewDecoder().Decode(data)
+	config, err := reader.ReadConfig(fixtureDir)
 
 	// then
+	assert.NoError(t, err)
 	assert.Equal(t, Config{
 		Aliases: []Alias{{
 			Name:          "service-a",

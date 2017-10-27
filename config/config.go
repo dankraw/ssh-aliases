@@ -79,3 +79,8 @@ func (c *Config) ToHostConfigInputs() ([]HostConfigInput, error) {
 	}
 	return inputs, nil
 }
+
+func (c *Config) Merge(config Config) {
+	c.Aliases = append(c.Aliases, config.Aliases...)
+	c.SSHConfigs = append(c.SSHConfigs, config.SSHConfigs...)
+}

@@ -10,7 +10,7 @@ func NewDecoder() *Decoder {
 	return &Decoder{}
 }
 
-func (d *Decoder) decode(input []byte) (Config, error) {
+func (d *Decoder) Decode(input []byte) (Config, error) {
 	config := Config{}
 	file, err := hcl.ParseBytes(input)
 	if err != nil {

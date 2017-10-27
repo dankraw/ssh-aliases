@@ -101,6 +101,44 @@ func TestShouldReturnErrorOnDuplicateAlias(t *testing.T) {
 	// given
 	config := Config{
 		Aliases: []Alias{{
+			Name: "project1",
+		}},
+		SSHConfigs: []SSHConfig{{
+			Name: "service-a",
+		}},
+	}
+
+	// when
+	config.Merge(Config{
+		Aliases: []Alias{{
+			Name: "project2",
+		}},
+		SSHConfigs: []SSHConfig{{
+			Name: "service-b",
+		}},
+	})
+
+	// then
+	assert.Equal(t, Config{
+		Aliases: []Alias{{
+			Name: "project1",
+		}, {
+			Name: "project2",
+		}},
+		SSHConfigs: []SSHConfig{{
+			Name: "service-a",
+		}, {
+			Name: "service-b",
+		}},
+	}, config)
+}
+
+func TestShouldMergeWithOtherConfig(t *testing.T) {
+	t.Parallel()
+
+	// given
+	config := Config{
+		Aliases: []Alias{{
 			Name: "service-a",
 		}, {
 			Name: "service-a",
@@ -113,5 +151,4 @@ func TestShouldReturnErrorOnDuplicateAlias(t *testing.T) {
 	// then
 	assert.Nil(t, results)
 	assert.Error(t, err)
-	assert.Equal(t, "Duplicate alias with name service-a", err.Error())
 }

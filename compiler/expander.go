@@ -52,27 +52,12 @@ func (e *Expander) expand(host string) ([]ExpandedHostname, error) {
 	ranges := []ExpandingRange{}
 	n := 1
 	for _, r := range e.rangeRegexp.FindAllStringSubmatchIndex(host, -1) {
-		begin, err := strconv.Atoi(host[r[2]:r[3]])
+		expRange, err := e.expandingRange(host, r)
 		if err != nil {
 			return nil, err
 		}
-		end, err := strconv.Atoi(host[r[4]:r[5]])
-		if err != nil {
-			return nil, err
-		}
-		if begin >= end {
-			return nil, errors.New(fmt.Sprintf("Invalid range: %v is not smaller than %v", begin, end))
-		}
-		rArray := []string{}
-		for i := begin; i <= end; i++ {
-			rArray = append(rArray, strconv.Itoa(i))
-		}
-		ranges = append(ranges, ExpandingRange{
-			beginIdx: r[0],
-			endIdx:   r[1],
-			values:   rArray,
-		})
-		n *= len(rArray)
+		ranges = append(ranges, expRange)
+		n *= len(expRange.values)
 	}
 	for _, v := range e.variationRegexp.FindAllStringSubmatchIndex(host, -1) {
 		split := strings.Split(host[v[2]:v[3]], "|")
@@ -86,10 +71,40 @@ func (e *Expander) expand(host string) ([]ExpandedHostname, error) {
 	if len(ranges) == 0 {
 		return []ExpandedHostname{{Hostname: host}}, nil
 	}
-	sort.Sort(ByIndex(ranges))
+	hostnames, err := e.expandedHostnames(n, host, ranges)
+	if err != nil {
+		return nil, err
+	}
+	return hostnames, nil
+}
 
+func (e *Expander) expandingRange(host string, rangeGroup []int) (ExpandingRange, error) {
+	begin, err := strconv.Atoi(host[rangeGroup[2]:rangeGroup[3]])
+	if err != nil {
+		return ExpandingRange{}, err
+	}
+	end, err := strconv.Atoi(host[rangeGroup[4]:rangeGroup[5]])
+	if err != nil {
+		return ExpandingRange{}, err
+	}
+	if begin >= end {
+		return ExpandingRange{}, errors.New(fmt.Sprintf("Invalid range: %v is not smaller than %v", begin, end))
+	}
+	values := []string{}
+	for i := begin; i <= end; i++ {
+		values = append(values, strconv.Itoa(i))
+	}
+	return ExpandingRange{
+		beginIdx: rangeGroup[0],
+		endIdx:   rangeGroup[1],
+		values:   values,
+	}, nil
+}
+
+func (e *Expander) expandedHostnames(size int, host string, ranges []ExpandingRange) ([]ExpandedHostname, error) {
 	hostnames := []ExpandedHostname{}
-	for i := 0; i < n; i++ {
+	sort.Sort(ByIndex(ranges))
+	for i := 0; i < size; i++ {
 		j := 1
 		hostnameReplacements := []string{}
 		produced := host[0:ranges[0].beginIdx]
@@ -116,3 +131,4 @@ func (e *Expander) expand(host string) ([]ExpandedHostname, error) {
 	}
 	return hostnames, nil
 }
+

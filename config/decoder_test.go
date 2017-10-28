@@ -8,13 +8,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const fixtureDir = "./test-fixtures"
+const FIXTURE_DIR = "./test-fixtures"
 
 func TestShouldDecodeConfig(t *testing.T) {
 	t.Parallel()
 
 	// given
-	data, _ := ioutil.ReadFile(filepath.Join(fixtureDir, "example.hcl"))
+	data, _ := ioutil.ReadFile(filepath.Join(FIXTURE_DIR, "example.hcl"))
 
 	// when
 	config, _ := NewDecoder().Decode(data)

@@ -1,6 +1,7 @@
 package domain
 
 type HostConfigInput struct {
+	AliasName       string
 	HostnamePattern string
 	AliasTemplate   string
 	HostConfig      HostConfig

@@ -62,6 +62,7 @@ func (c *Config) ToHostConfigInputs() ([]HostConfigInput, error) {
 		}
 		aliases[a.Name] = a
 		input := HostConfigInput{
+			AliasName:       a.Name,
 			HostnamePattern: a.Pattern,
 			AliasTemplate:   a.Template,
 		}

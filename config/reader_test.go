@@ -12,7 +12,7 @@ func TestShouldReadCompleteConfigFromDir(t *testing.T) {
 	reader := NewReader()
 
 	// when
-	config, err := reader.ReadConfig(fixtureDir)
+	config, err := reader.ReadConfigs(FIXTURE_DIR)
 
 	// then
 	assert.NoError(t, err)

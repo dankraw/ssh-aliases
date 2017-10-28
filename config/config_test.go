@@ -37,12 +37,14 @@ func TestShouldMapToHostConfigInputs(t *testing.T) {
 	// then
 	assert.NoError(t, err)
 	assert.Equal(t, []HostConfigInput{{
+		AliasName:       "service-a",
 		HostnamePattern: "service-a[1..5].example.com",
 		AliasTemplate:   "a%1",
 		HostConfig: HostConfig{
 			IdentityFile: "a_id_rsa.pub",
 			Port:         22,
 		}}, {
+		AliasName:       "service-b",
 		HostnamePattern: "service-b[1..2].example.com",
 		AliasTemplate:   "b%1",
 		HostConfig: HostConfig{

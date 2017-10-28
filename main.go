@@ -1,7 +1,17 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	. "github.com/dankraw/ssh-aliases/command"
+	"os"
+)
+
+var VERSION string
 
 func main() {
-	fmt.Printf("ssh-aliases")
+	err := NewCLI(VERSION).ConfigureCLI()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "An error occurred:\n%v\n", err.Error())
+		os.Exit(1)
+	}
 }

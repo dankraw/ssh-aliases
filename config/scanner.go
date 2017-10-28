@@ -1,8 +1,8 @@
 package config
 
 import (
-	"fmt"
 	"io/ioutil"
+	"path/filepath"
 	"strings"
 )
 
@@ -22,7 +22,7 @@ func (s *Scanner) ScanDirectory(path string) ([]string, error) {
 	hcls := []string{}
 	for _, file := range files {
 		if !file.IsDir() && strings.HasSuffix(file.Name(), hclExtension) {
-			hcls = append(hcls, fmt.Sprintf("%s/%s", path, file.Name()))
+			hcls = append(hcls, filepath.Join(path, file.Name()))
 		}
 	}
 	return hcls, nil

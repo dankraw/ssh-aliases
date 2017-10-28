@@ -18,7 +18,7 @@ type CLI struct {
 func NewCLI(version string) *CLI {
 	return &CLI{
 		version:     version,
-		ListCommand: NewListCommand(),
+		ListCommand: NewListCommand(os.Stdout),
 	}
 }
 

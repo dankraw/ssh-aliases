@@ -3,18 +3,22 @@ package command
 import (
 	"fmt"
 
+	"io"
+
 	"github.com/dankraw/ssh-aliases/compiler"
 	"github.com/dankraw/ssh-aliases/config"
 )
 
 type ListCommand struct {
+	writer        io.Writer
 	configReader  *config.Reader
 	configScanner *config.Scanner
 	compiler      *compiler.Compiler
 }
 
-func NewListCommand() *ListCommand {
+func NewListCommand(writer io.Writer) *ListCommand {
 	return &ListCommand{
+		writer:        writer,
 		configReader:  config.NewReader(),
 		configScanner: config.NewScanner(),
 		compiler:      compiler.NewCompiler(),
@@ -35,15 +39,15 @@ func (e *ListCommand) List(dir string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("%v (definitions=%d):\n", f, len(inputs))
+		fmt.Fprintf(e.writer, "%v (definitions=%d):\n", f, len(inputs))
 		for _, input := range inputs {
 			results, err := e.compiler.Compile(input)
-			fmt.Printf(" %v (compiled=%d):\n", input.AliasName, len(results))
+			fmt.Fprintf(e.writer, " %v (compiled=%d):\n", input.AliasName, len(results))
 			if err != nil {
 				return err
 			}
 			for _, r := range results {
-				fmt.Printf("  %v: %v\n", r.Host, r.HostName)
+				fmt.Fprintf(e.writer, "  %v: %v\n", r.Host, r.HostName)
 			}
 		}
 	}

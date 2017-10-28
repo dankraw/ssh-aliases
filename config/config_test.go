@@ -1,9 +1,10 @@
 package config
 
 import (
+	"testing"
+
 	. "github.com/dankraw/ssh-aliases/domain"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestShouldMapToHostConfigInputs(t *testing.T) {

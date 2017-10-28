@@ -1,9 +1,10 @@
 package compiler
 
 import (
-	. "github.com/dankraw/ssh-aliases/domain"
 	"regexp"
 	"strconv"
+
+	. "github.com/dankraw/ssh-aliases/domain"
 )
 
 type Compiler struct {

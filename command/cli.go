@@ -2,9 +2,10 @@ package command
 
 import (
 	"fmt"
-	"github.com/urfave/cli"
 	"os"
 	"os/user"
+
+	"github.com/urfave/cli"
 )
 
 const SSH_ALIASES_DIR = ".ssh-aliases"

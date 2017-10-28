@@ -2,6 +2,7 @@ package command
 
 import (
 	"fmt"
+
 	"github.com/dankraw/ssh-aliases/compiler"
 	"github.com/dankraw/ssh-aliases/config"
 )

@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	. "github.com/dankraw/ssh-aliases/command"
 	"os"
+
+	. "github.com/dankraw/ssh-aliases/command"
 )
 
 var VERSION string

@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"fmt"
+
 	. "github.com/dankraw/ssh-aliases/domain"
 )
 

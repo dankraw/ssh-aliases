@@ -25,7 +25,7 @@ func NewListCommand(writer io.Writer) *ListCommand {
 	}
 }
 
-func (e *ListCommand) List(dir string) error {
+func (e *ListCommand) Execute(dir string) error {
 	files, err := e.configScanner.ScanDirectory(dir)
 	if err != nil {
 		return err

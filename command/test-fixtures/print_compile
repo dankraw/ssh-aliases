@@ -1,0 +1,28 @@
+Host c1
+     HostName service-c1.example.com
+     IdentityFile c_id_rsa.pub
+
+Host c2
+     HostName service-c2.example.com
+     IdentityFile c_id_rsa.pub
+
+Host a1
+     HostName service-a1.example.com
+     IdentityFile id_rsa.pub
+     Port 22
+
+Host a2
+     HostName service-a2.example.com
+     IdentityFile id_rsa.pub
+     Port 22
+
+Host b1
+     HostName service-b1.example.com
+     IdentityFile id_rsa.pub
+     Port 22
+
+Host b2
+     HostName service-b2.example.com
+     IdentityFile id_rsa.pub
+     Port 22
+

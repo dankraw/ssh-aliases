@@ -1,9 +1,8 @@
 package command
 
 import (
-	"testing"
-
 	"bytes"
+	"testing"
 
 	"io/ioutil"
 	"path/filepath"
@@ -11,20 +10,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const FIXTURE_DIR = "test-fixtures"
-
-func TestList(t *testing.T) {
+func TestCompile(t *testing.T) {
 	t.Parallel()
 
 	// given
 	buffer := new(bytes.Buffer)
 
 	// when
-	err := NewListCommand(buffer).Execute(FIXTURE_DIR)
+	err := NewCompileCommand(buffer).Execute(FIXTURE_DIR)
 
 	// then
 	assert.NoError(t, err)
-	output, _ := ioutil.ReadFile(filepath.Join(FIXTURE_DIR, "print_list"))
+	output, _ := ioutil.ReadFile(filepath.Join(FIXTURE_DIR, "print_compile"))
 	assert.Equal(t, string(output), buffer.String())
 
 }

@@ -1,0 +1,11 @@
+test-fixtures/another.hcl (definitions=1):
+ service-c (compiled=2):
+  c1: service-c1.example.com
+  c2: service-c2.example.com
+test-fixtures/example.hcl (definitions=2):
+ service-a (compiled=2):
+  a1: service-a1.example.com
+  a2: service-a2.example.com
+ service-b (compiled=2):
+  b1: service-b1.example.com
+  b2: service-b2.example.com

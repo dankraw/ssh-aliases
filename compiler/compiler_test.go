@@ -78,5 +78,23 @@ func TestShouldExpandHostnameWithProvidedRange(t *testing.T) {
 		Host:     "m6",
 		HostName: "x-master6.myproj-prod.dc1.net",
 	}}, results)
-
 }
+
+func TestShouldAllowStaticAliasDefinitions(t *testing.T) {
+	t.Parallel()
+
+	// given
+	input := HostConfigInput{
+		HostnamePattern: "x-master1.myproj-prod.dc1.net",
+		AliasTemplate:   "master1",
+	}
+
+	// when
+	results, err := NewCompiler().Compile(input)
+
+	// then
+	assert.NoError(t, err)
+	assert.Len(t, results, 1)
+	assert.Equal(t, "master1", results[0].Host)
+}
+

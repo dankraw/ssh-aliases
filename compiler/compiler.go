@@ -19,7 +19,7 @@ func NewCompiler() *Compiler {
 	}
 }
 
-type TemplateReplacemenet struct {
+type TemplateReplacement struct {
 	beginIdx       int
 	endIdx         int
 	replacementIdx int
@@ -32,14 +32,14 @@ func (c *Compiler) Compile(input HostConfigInput) ([]HostConfigResult, error) {
 		return nil, err
 	}
 	templateGroups := c.groupsRegexp.FindAllStringSubmatchIndex(input.AliasTemplate, -1)
-	selectors := []TemplateReplacemenet{}
+	replacements := []TemplateReplacement{}
 	for _, group := range templateGroups {
 		hostnameGroupSelect, _ := strconv.Atoi(input.AliasTemplate[group[2]:group[3]])
-		selectors = append(selectors, TemplateReplacemenet{group[0], group[1], hostnameGroupSelect - 1})
+		replacements = append(replacements, TemplateReplacement{group[0], group[1], hostnameGroupSelect - 1})
 	}
 	for _, h := range expanded {
 		results = append(results, HostConfigResult{
-			Host:       c.compileToTargetHost(input.AliasTemplate, selectors, h),
+			Host:       c.compileToTargetHost(input.AliasTemplate, replacements, h),
 			HostName:   h.Hostname,
 			HostConfig: input.HostConfig,
 		})
@@ -47,17 +47,20 @@ func (c *Compiler) Compile(input HostConfigInput) ([]HostConfigResult, error) {
 	return results, nil
 }
 
-func (c *Compiler) compileToTargetHost(aliasTemplate string, selectors []TemplateReplacemenet, host ExpandedHostname) string {
+func (c *Compiler) compileToTargetHost(aliasTemplate string, replacements []TemplateReplacement, host ExpandedHostname) string {
+	if len(replacements) == 0 {
+		return aliasTemplate
+	}
 	alias := ""
-	for i, s := range selectors {
+	for i, s := range replacements {
 		if i == 0 {
 			alias += aliasTemplate[0:s.beginIdx]
 		}
 
 		alias += host.Replacements[s.replacementIdx]
 		nextIdx := i + 1
-		if nextIdx < len(selectors) {
-			nextSelector := selectors[nextIdx]
+		if nextIdx < len(replacements) {
+			nextSelector := replacements[nextIdx]
 			alias += aliasTemplate[s.endIdx:nextSelector.beginIdx]
 		} else {
 			alias += aliasTemplate[s.endIdx:]

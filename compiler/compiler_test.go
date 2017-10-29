@@ -97,4 +97,3 @@ func TestShouldAllowStaticAliasDefinitions(t *testing.T) {
 	assert.Len(t, results, 1)
 	assert.Equal(t, "master1", results[0].Host)
 }
-

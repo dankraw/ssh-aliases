@@ -35,6 +35,7 @@ type CompileCommand struct {
 	writer       io.Writer
 	configReader *config.Reader
 	compiler     *compiler.Compiler
+	validator    *compiler.Validator
 }
 
 func NewCompileCommand(writer io.Writer) *CompileCommand {
@@ -43,6 +44,7 @@ func NewCompileCommand(writer io.Writer) *CompileCommand {
 		writer:       writer,
 		configReader: config.NewReader(),
 		compiler:     compiler.NewCompiler(),
+		validator:    compiler.NewValidator(),
 	}
 }
 
@@ -55,14 +57,20 @@ func (c *CompileCommand) Execute(dir string) error {
 	if err != nil {
 		return err
 	}
+	allResults := []HostConfigResult{}
 	for _, input := range inputs {
 		results, err := c.compiler.Compile(input)
 		if err != nil {
 			return err
 		}
-		for _, result := range results {
-			c.printHostConfig(result)
-		}
+		allResults = append(allResults, results...)
+	}
+	err = c.validator.ValidateResults(allResults)
+	if err != nil {
+		return err
+	}
+	for _, result := range allResults {
+		c.printHostConfig(result)
 	}
 	return nil
 }

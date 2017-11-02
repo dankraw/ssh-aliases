@@ -13,7 +13,7 @@ import (
 
 const FIXTURE_DIR = "test-fixtures"
 
-func TestList(t *testing.T) {
+func TestListCommandExecute(t *testing.T) {
 	t.Parallel()
 
 	// given

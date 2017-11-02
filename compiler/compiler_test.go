@@ -12,7 +12,7 @@ func TestCompile(t *testing.T) {
 
 	// given
 	sshConfig := HostConfig{
-		IdentityFile: "~/.ssh/id_rsa",
+		"identity_file": "~/.ssh/id_rsa",
 	}
 	input := HostConfigInput{
 		HostnamePattern: "x-master[1..2].myproj-prod.dc1.net",

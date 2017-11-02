@@ -4,11 +4,6 @@ alias "service-a" {
   ssh_config_name = "service-a"
 }
 
-ssh_config "service-a" {
-  identity_file = "a_id_rsa.pub"
-  port = 22
-}
-
 alias "service-b" {
   pattern = "service-b[1..2].example.com",
   template = "b%1"
@@ -16,4 +11,9 @@ alias "service-b" {
     identity_file = "b_id_rsa.pub"
     port = 22
   }
+}
+
+ssh_config "service-a" {
+  identity_file = "a_id_rsa.pub"
+  port = 22
 }

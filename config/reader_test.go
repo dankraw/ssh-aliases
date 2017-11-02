@@ -3,6 +3,7 @@ package config
 import (
 	"testing"
 
+	. "github.com/dankraw/ssh-aliases/domain"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -27,14 +28,14 @@ func TestShouldReadCompleteConfigFromDir(t *testing.T) {
 			Name:     "service-b",
 			Pattern:  "service-b[1..2].example.com",
 			Template: "b%1",
-			SSHConfig: EmbeddedSSHConfig{
-				IdentityFile: "b_id_rsa.pub",
-				Port:         22,
+			SSHConfig: HostConfig{
+				"identity_file": "b_id_rsa.pub",
+				"port":          22,
 			},
-		}}, SSHConfigs: []SSHConfig{{
-			Name:         "service-a",
-			IdentityFile: "a_id_rsa.pub",
-			Port:         22,
-		}},
+		}}, RawSSHConfigs: RawSSHConfigs{
+			"service-a": []map[string]interface{}{{
+				"identity_file": "a_id_rsa.pub",
+				"port":          22,
+			}}},
 	}, config)
 }

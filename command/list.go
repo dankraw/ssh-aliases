@@ -7,6 +7,7 @@ import (
 
 	"github.com/dankraw/ssh-aliases/compiler"
 	"github.com/dankraw/ssh-aliases/config"
+	"github.com/fatih/color"
 )
 
 type ListCommand struct {
@@ -30,7 +31,8 @@ func (e *ListCommand) Execute(dir string) error {
 	if err != nil {
 		return err
 	}
-	for _, f := range files {
+	white := color.New(color.FgHiWhite)
+	for i, f := range files {
 		config, err := e.configReader.ReadConfig(f)
 		if err != nil {
 			return err
@@ -39,10 +41,16 @@ func (e *ListCommand) Execute(dir string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Fprintf(e.writer, "%v (definitions=%d):\n", f, len(inputs))
+		file_delimiter := ""
+		if i > 0 {
+			file_delimiter = "\n"
+		}
+		white.Fprint(e.writer, file_delimiter+f)
+		fmt.Fprintf(e.writer, " (%d):\n", len(inputs))
 		for _, input := range inputs {
 			results, err := e.compiler.Compile(input)
-			fmt.Fprintf(e.writer, " %v (compiled=%d):\n", input.AliasName, len(results))
+			white.Fprint(e.writer, "\n "+input.AliasName)
+			fmt.Fprintf(e.writer, " (%d):\n", len(results))
 			if err != nil {
 				return err
 			}

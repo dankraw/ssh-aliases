@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCompile(t *testing.T) {
+func TestCompileCommandExecute(t *testing.T) {
 	t.Parallel()
 
 	// given
@@ -23,5 +23,4 @@ func TestCompile(t *testing.T) {
 	assert.NoError(t, err)
 	output, _ := ioutil.ReadFile(filepath.Join(FIXTURE_DIR, "print_compile"))
 	assert.Equal(t, string(output), buffer.String())
-
 }

@@ -6,8 +6,6 @@ import (
 	"io"
 	"io/ioutil"
 
-	"sort"
-
 	"github.com/dankraw/ssh-aliases/compiler"
 	"github.com/dankraw/ssh-aliases/config"
 	. "github.com/dankraw/ssh-aliases/domain"
@@ -38,7 +36,6 @@ type CompileCommand struct {
 	configReader *config.Reader
 	compiler     *compiler.Compiler
 	validator    *compiler.Validator
-	sanitizer    *config.Sanitizer
 }
 
 func NewCompileCommand(writer io.Writer) *CompileCommand {
@@ -48,7 +45,6 @@ func NewCompileCommand(writer io.Writer) *CompileCommand {
 		configReader: config.NewReader(),
 		compiler:     compiler.NewCompiler(),
 		validator:    compiler.NewValidator(),
-		sanitizer:    config.NewSanitizer(),
 	}
 }
 
@@ -83,15 +79,12 @@ func (c *CompileCommand) printHostConfig(config HostConfigResult) {
 	fmt.Fprintf(c.writer, "Host %v\n", config.Host)
 	c.printHostConfigProperty("HostName", config.HostName)
 
-	entries := config.HostConfig.ToHostConfigEntries()
-	sort.Sort(ByHostConfigEntryKey(entries))
-
-	for _, e := range entries {
+	for _, e := range config.HostConfig {
 		c.printHostConfigProperty(e.Key, e.Value)
 	}
 	fmt.Fprintln(c.writer)
 }
 
 func (c *CompileCommand) printHostConfigProperty(keyword string, value interface{}) {
-	fmt.Fprintf(c.writer, "     %s %v\n", c.sanitizer.Sanitize(keyword), value)
+	fmt.Fprintf(c.writer, "     %s %v\n", keyword, value)
 }

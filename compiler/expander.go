@@ -69,6 +69,9 @@ func (e *Expander) expand(host string) ([]ExpandedHostname, error) {
 		n *= len(split)
 	}
 	if len(ranges) == 0 {
+		if !e.hostnameRegexp.MatchString(host) {
+			return nil, errors.New(fmt.Sprintf("Produced string '%v' is not a valid Hostname", host))
+		}
 		return []ExpandedHostname{{Hostname: host}}, nil
 	}
 	hostnames, err := e.expandedHostnames(n, host, ranges)

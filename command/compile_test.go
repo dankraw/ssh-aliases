@@ -17,10 +17,10 @@ func TestCompileCommandExecute(t *testing.T) {
 	buffer := new(bytes.Buffer)
 
 	// when
-	err := NewCompileCommand(buffer).Execute(FIXTURE_DIR)
+	err := NewCompileCommand(buffer).Execute(fixtureDir)
 
 	// then
 	assert.NoError(t, err)
-	output, _ := ioutil.ReadFile(filepath.Join(FIXTURE_DIR, "print_compile"))
+	output, _ := ioutil.ReadFile(filepath.Join(fixtureDir, "print_compile"))
 	assert.Equal(t, string(output), buffer.String())
 }

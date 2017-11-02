@@ -41,16 +41,16 @@ func TestShouldMapToHostConfigInputs(t *testing.T) {
 		AliasName:       "service-a",
 		HostnamePattern: "service-a[1..5].example.com",
 		AliasTemplate:   "a%1",
-		HostConfig: HostConfig{
-			"identity_file": "a_id_rsa.pub",
-			"port":          22,
+		HostConfig: HostConfigEntries{
+			{"IdentityFile", "a_id_rsa.pub"},
+			{"Port", 22},
 		}}, {
 		AliasName:       "service-b",
 		HostnamePattern: "service-b[1..2].example.com",
 		AliasTemplate:   "b%1",
-		HostConfig: HostConfig{
-			"identity_file": "b_id_rsa.pub",
-			"port":          22,
+		HostConfig: HostConfigEntries{
+			{"IdentityFile", "b_id_rsa.pub"},
+			{"Port", 22},
 		}},
 	}, inputs)
 }
@@ -168,4 +168,27 @@ func TestShouldReturnErrorOnDuplicateAlias(t *testing.T) {
 	// then
 	assert.Nil(t, results)
 	assert.Error(t, err)
+}
+
+func TestShouldSortHostConfigAndSanitizeKeywords(t *testing.T) {
+	t.Parallel()
+
+	// given
+	config := HostConfig{
+		"b": "something",
+		"c": "abc",
+		"d": 0,
+		"a": 123,
+	}
+
+	// when
+	entries := config.toSortedHostConfigEntries()
+
+	// then
+	assert.Equal(t, HostConfigEntries{
+		{"A", 123},
+		{"B", "something"},
+		{"C", "abc"},
+		{"D", 0},
+	}, entries)
 }

@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 
+	"sort"
+
 	. "github.com/dankraw/ssh-aliases/domain"
 )
 
@@ -24,7 +26,30 @@ type RawSSHConfigs map[string]interface{}
 
 type NamedConfigs map[string]HostConfig
 
-func (c *Config) NamedConfigs() (NamedConfigs, error) {
+type NamedHostConfigEntries map[string]HostConfigEntries
+
+func (c *NamedConfigs) toNamedHostConfigEntries() NamedHostConfigEntries {
+	entries := NamedHostConfigEntries{}
+	for n, config := range *c {
+		entries[n] = config.toSortedHostConfigEntries()
+	}
+	return entries
+}
+
+type HostConfig map[string]interface{}
+
+var sanitizer = NewSanitizer()
+
+func (c *HostConfig) toSortedHostConfigEntries() HostConfigEntries {
+	entries := []HostConfigEntry{}
+	for k, v := range *c {
+		entries = append(entries, HostConfigEntry{sanitizer.Sanitize(k), v})
+	}
+	sort.Sort(ByHostConfigEntryKey(entries))
+	return entries
+}
+
+func (c *Config) namedConfigs() (NamedConfigs, error) {
 	namedConfigsMap := NamedConfigs{}
 	for name, r := range c.RawSSHConfigs {
 		if _, err := namedConfigsMap[name]; err {
@@ -36,10 +61,11 @@ func (c *Config) NamedConfigs() (NamedConfigs, error) {
 }
 
 func (c *Config) ToHostConfigInputs() ([]HostConfigInput, error) {
-	namedConfigs, err := c.NamedConfigs()
+	namedConfigs, err := c.namedConfigs()
 	if err != nil {
 		return nil, err
 	}
+	namedConfigEntries := namedConfigs.toNamedHostConfigEntries()
 	inputs := []HostConfigInput{}
 
 	aliases := map[string]Alias{}
@@ -54,14 +80,14 @@ func (c *Config) ToHostConfigInputs() ([]HostConfigInput, error) {
 			AliasTemplate:   a.Template,
 		}
 		if a.SSHConfigName != "" {
-			if named, ok := namedConfigs[a.SSHConfigName]; ok {
+			if named, ok := namedConfigEntries[a.SSHConfigName]; ok {
 				input.HostConfig = named
 			} else {
 				return nil, errors.New(fmt.Sprintf("No ssh-config named %v found (used by %v alias)",
 					a.SSHConfigName, a.Name))
 			}
 		} else {
-			input.HostConfig = a.SSHConfig
+			input.HostConfig = a.SSHConfig.toSortedHostConfigEntries()
 		}
 		inputs = append(inputs, input)
 	}

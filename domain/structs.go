@@ -4,24 +4,16 @@ type HostConfigInput struct {
 	AliasName       string
 	HostnamePattern string
 	AliasTemplate   string
-	HostConfig      HostConfig
-}
-
-type HostConfig map[string]interface{}
-
-func (c HostConfig) ToHostConfigEntries() []HostConfigEntry {
-	entries := []HostConfigEntry{}
-	for k, v := range c {
-		entries = append(entries, HostConfigEntry{k, v})
-	}
-	return entries
+	HostConfig      HostConfigEntries
 }
 
 type HostConfigResult struct {
 	Host       string
 	HostName   string
-	HostConfig HostConfig
+	HostConfig HostConfigEntries
 }
+
+type HostConfigEntries []HostConfigEntry
 
 type HostConfigEntry struct {
 	Key   string

@@ -5,17 +5,16 @@ import (
 	"path/filepath"
 	"testing"
 
-	. "github.com/dankraw/ssh-aliases/domain"
 	"github.com/stretchr/testify/assert"
 )
 
-const FIXTURE_DIR = "./test-fixtures"
+const fixtureDir = "./test-fixtures"
 
 func TestShouldDecodeConfig(t *testing.T) {
 	t.Parallel()
 
 	// given
-	data, _ := ioutil.ReadFile(filepath.Join(FIXTURE_DIR, "example.hcl"))
+	data, _ := ioutil.ReadFile(filepath.Join(fixtureDir, "example.hcl"))
 
 	// when
 	config, _ := NewDecoder().Decode(data)

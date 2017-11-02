@@ -72,6 +72,20 @@ func TestShouldReturnErrorWhenProducedStringIsNotAValidHostname(t *testing.T) {
 	assert.Equal(t, "Produced string '--ddd--1...' is not a valid Hostname", err.Error())
 }
 
+func TestShouldReturnErrorWhenNoRangeWasFoundAndProducedStringIsNotAValidHostname(t *testing.T) {
+	t.Parallel()
+
+	// given
+	hostname := "--ddd--[1..2..."
+
+	// when
+	_, err := NewExpander().expand(hostname)
+
+	// then
+	assert.Error(t, err)
+	assert.Equal(t, "Produced string '--ddd--[1..2...' is not a valid Hostname", err.Error())
+}
+
 func TestShouldExpandHostnameWithMultipleRanges(t *testing.T) {
 	t.Parallel()
 	// given

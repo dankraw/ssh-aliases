@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const FIXTURE_DIR = "test-fixtures"
+const fixtureDir = "test-fixtures"
 
 func TestListCommandExecute(t *testing.T) {
 	t.Parallel()
@@ -20,11 +20,11 @@ func TestListCommandExecute(t *testing.T) {
 	buffer := new(bytes.Buffer)
 
 	// when
-	err := NewListCommand(buffer).Execute(FIXTURE_DIR)
+	err := NewListCommand(buffer).Execute(fixtureDir)
 
 	// then
 	assert.NoError(t, err)
-	output, _ := ioutil.ReadFile(filepath.Join(FIXTURE_DIR, "print_list"))
+	output, _ := ioutil.ReadFile(filepath.Join(fixtureDir, "print_list"))
 	assert.Equal(t, string(output), buffer.String())
 
 }

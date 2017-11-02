@@ -13,7 +13,7 @@ func TestShouldScanDir(t *testing.T) {
 	scanner := NewScanner()
 
 	// when
-	hcls, err := scanner.ScanDirectory(FIXTURE_DIR)
+	hcls, err := scanner.ScanDirectory(fixtureDir)
 
 	// then
 	assert.NoError(t, err)

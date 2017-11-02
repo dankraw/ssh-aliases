@@ -3,7 +3,6 @@ package config
 import (
 	"testing"
 
-	. "github.com/dankraw/ssh-aliases/domain"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -14,7 +13,7 @@ func TestShouldReadCompleteConfigFromDir(t *testing.T) {
 	reader := NewReader()
 
 	// when
-	config, err := reader.ReadConfigs(FIXTURE_DIR)
+	config, err := reader.ReadConfigs(fixtureDir)
 
 	// then
 	assert.NoError(t, err)

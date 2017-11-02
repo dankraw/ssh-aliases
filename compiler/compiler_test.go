@@ -11,9 +11,7 @@ func TestCompile(t *testing.T) {
 	t.Parallel()
 
 	// given
-	sshConfig := HostConfig{
-		"identity_file": "~/.ssh/id_rsa",
-	}
+	sshConfig := HostConfigEntries{{"identity_file", "~/.ssh/id_rsa"}}
 	input := HostConfigInput{
 		HostnamePattern: "x-master[1..2].myproj-prod.dc1.net",
 		AliasTemplate:   "host%1-dc1",

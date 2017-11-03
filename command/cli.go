@@ -9,7 +9,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-const SSH_ALIASES_DIR = ".ssh-aliases"
+const sshAliasesDir = ".ssh_aliases"
 
 type CLI struct {
 	version string
@@ -38,7 +38,7 @@ func (c *CLI) ConfigureCLI() error {
 		cli.StringFlag{
 			Name:        "scan",
 			Usage:       "Path to scan for input HCL config files",
-			Value:       filepath.Join(homeDir, SSH_ALIASES_DIR),
+			Value:       filepath.Join(homeDir, sshAliasesDir),
 			Destination: &scanDir,
 		},
 	}

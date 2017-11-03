@@ -1,16 +1,16 @@
-alias "service-a" {
-  pattern = "service-a[1..2].example.com",
-  template = "a%1"
-  ssh_config_name = "global"
+host "service-a" {
+  hostname = "service-a[1..2].example.com",
+  alias = "a%1"
+  config = "global"
 }
 
-alias "service-b" {
-  pattern = "service-b[1..2].example.com",
-  template = "b%1"
-  ssh_config_name = "global"
+host "service-b" {
+  hostname = "service-b[1..2].example.com",
+  alias = "b%1"
+  config = "global"
 }
 
-ssh_config "global" {
+config "global" {
   identity_file = "id_rsa.pub"
   port = 22
 }

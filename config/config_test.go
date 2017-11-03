@@ -11,20 +11,21 @@ func TestShouldMapToHostConfigInputs(t *testing.T) {
 	t.Parallel()
 
 	// given
-	config := Config{
-		Aliases: []Alias{{
-			Name:          "service-a",
-			Pattern:       "service-a[1..5].example.com",
-			Template:      "a%1",
-			SSHConfigName: "service-a",
+	config := HostsWithConfigs{
+		Hosts: []Host{{
+			Name:        "service-a",
+			Hostname:    "service-a[1..5].example.com",
+			Alias:       "a%1",
+			ConfigOrRef: "service-a",
 		}, {
 			Name:     "service-b",
-			Pattern:  "service-b[1..2].example.com",
-			Template: "b%1",
-			SSHConfig: HostConfig{
+			Hostname: "service-b[1..2].example.com",
+			Alias:    "b%1",
+			ConfigOrRef: []map[string]interface{}{{
 				"identity_file": "b_id_rsa.pub",
-				"port":          22,
-			},
+			}, {
+				"port": 22,
+			}},
 		}}, RawSSHConfigs: RawSSHConfigs{
 			"service-a": []map[string]interface{}{{
 				"identity_file": "a_id_rsa.pub",
@@ -55,16 +56,64 @@ func TestShouldMapToHostConfigInputs(t *testing.T) {
 	}, inputs)
 }
 
+func TestShouldReturnErrorOnDuplicateKey(t *testing.T) {
+	t.Parallel()
+
+	// given
+	config := HostsWithConfigs{
+		Hosts: []Host{{
+			Name:     "service-b",
+			Hostname: "service-b[1..2].example.com",
+			Alias:    "b%1",
+			ConfigOrRef: []map[string]interface{}{{
+				"identity_file": "b_id_rsa.pub",
+			}, {
+				"identity_file": "c_id_rsa.pub",
+			}},
+		}},
+	}
+
+	// when
+	inputs, err := config.ToHostConfigInputs()
+
+	// then
+	assert.Error(t, err)
+	assert.Nil(t, inputs)
+	assert.Equal(t, "Duplicate config property `identity_file` for host `service-b`", err.Error())
+}
+
+func TestShouldReturnErrorOnDuplicateKeyInRawConfigs(t *testing.T) {
+	t.Parallel()
+
+	// given
+	config := HostsWithConfigs{
+		RawSSHConfigs: RawSSHConfigs{
+			"service-a": []map[string]interface{}{
+				{"identity_file": "abc"},
+				{"identity_file": "abc"},
+			},
+		},
+	}
+
+	// when
+	inputs, err := config.ToHostConfigInputs()
+
+	// then
+	assert.Error(t, err)
+	assert.Nil(t, inputs)
+	assert.Equal(t, "Duplicate config entry `identity_file` in host `service-a`", err.Error())
+}
+
 func TestShouldReturnErrorOnNotFoundSSHConfig(t *testing.T) {
 	t.Parallel()
 
 	// given
-	config := Config{
-		Aliases: []Alias{{
-			Name:          "service-a",
-			Pattern:       "service-a[1..5].example.com",
-			Template:      "a%1",
-			SSHConfigName: "this-does-not-exists",
+	config := HostsWithConfigs{
+		Hosts: []Host{{
+			Name:        "service-a",
+			Hostname:    "service-a[1..5].example.com",
+			Alias:       "a%1",
+			ConfigOrRef: "this-does-not-exists",
 		}},
 	}
 
@@ -74,15 +123,15 @@ func TestShouldReturnErrorOnNotFoundSSHConfig(t *testing.T) {
 	// then
 	assert.Nil(t, results)
 	assert.Error(t, err)
-	assert.Equal(t, "No ssh-config named this-does-not-exists found (used by service-a alias)", err.Error())
+	assert.Equal(t, "No config `this-does-not-exists` found (used by host `service-a`)", err.Error())
 }
 
 func TestShouldMergeWithOtherConfig(t *testing.T) {
 	t.Parallel()
 
 	// given
-	config := Config{
-		Aliases: []Alias{{
+	config := HostsWithConfigs{
+		Hosts: []Host{{
 			Name: "project1",
 		}},
 		RawSSHConfigs: RawSSHConfigs{
@@ -93,8 +142,8 @@ func TestShouldMergeWithOtherConfig(t *testing.T) {
 	}
 
 	// when
-	err := config.Merge(Config{
-		Aliases: []Alias{{
+	err := config.Merge(HostsWithConfigs{
+		Hosts: []Host{{
 			Name: "project2",
 		}},
 		RawSSHConfigs: RawSSHConfigs{
@@ -106,8 +155,8 @@ func TestShouldMergeWithOtherConfig(t *testing.T) {
 
 	// then
 	assert.NoError(t, err)
-	assert.Equal(t, Config{
-		Aliases: []Alias{{
+	assert.Equal(t, HostsWithConfigs{
+		Hosts: []Host{{
 			Name: "project1",
 		}, {
 			Name: "project2",
@@ -127,14 +176,14 @@ func TestShouldReturnErrorOnDuplicateSSHConfigWhenMerging(t *testing.T) {
 	t.Parallel()
 
 	// given
-	config := Config{
+	config := HostsWithConfigs{
 		RawSSHConfigs: RawSSHConfigs{
 			"service-a": []map[string]interface{}{{
 				"identity_file": "a_id_rsa.pub",
 			}},
 		},
 	}
-	config2 := Config{
+	config2 := HostsWithConfigs{
 		RawSSHConfigs: RawSSHConfigs{
 			"service-a": []map[string]interface{}{{
 				"port": 22,
@@ -147,15 +196,15 @@ func TestShouldReturnErrorOnDuplicateSSHConfigWhenMerging(t *testing.T) {
 
 	// then
 	assert.Error(t, err)
-	assert.Equal(t, "Duplicate ssh-config with name service-a", err.Error())
+	assert.Equal(t, "Duplicate config `service-a`", err.Error())
 }
 
 func TestShouldReturnErrorOnDuplicateAlias(t *testing.T) {
 	t.Parallel()
 
 	// given
-	config := Config{
-		Aliases: []Alias{{
+	config := HostsWithConfigs{
+		Hosts: []Host{{
 			Name: "service-a",
 		}, {
 			Name: "service-a",

@@ -9,24 +9,49 @@ import (
 	. "github.com/dankraw/ssh-aliases/domain"
 )
 
-type Config struct {
-	Aliases       []Alias       `hcl:"alias"`
-	RawSSHConfigs RawSSHConfigs `hcl:"ssh_config"`
+type HostsWithConfigs struct {
+	Hosts         []Host        `hcl:"host"`
+	RawSSHConfigs RawSSHConfigs `hcl:"config"`
 }
 
-type Alias struct {
-	Name          string     `hcl:",key"`
-	Pattern       string     `hcl:"pattern"`
-	Template      string     `hcl:"template"`
-	SSHConfigName string     `hcl:"ssh_config_name"`
-	SSHConfig     HostConfig `hcl:"ssh_config"`
+type Host struct {
+	Name        string      `hcl:",key"`
+	Hostname    string      `hcl:"hostname"`
+	Alias       string      `hcl:"alias"`
+	ConfigOrRef ConfigOrRef `hcl:"config"`
 }
+
+type ConfigOrRef interface{}
 
 type RawSSHConfigs map[string]interface{}
 
+func (c *HostsWithConfigs) namedConfigs() (NamedConfigs, error) {
+	namedConfigsMap := NamedConfigs{}
+	for name, r := range c.RawSSHConfigs {
+		if _, err := namedConfigsMap[name]; err {
+			return NamedConfigs{}, errors.New(fmt.Sprintf("Duplicate config with name %v", name))
+		}
+		h := HostConfig{}
+		if m, ok := r.([]map[string]interface{}); ok {
+			for _, x := range m {
+				for k, v := range x {
+					if _, ok := h[k]; ok {
+						return NamedConfigs{}, errors.New(fmt.Sprintf("Duplicate config entry `%v` in host `%v`", k, name))
+					}
+					h[k] = v
+				}
+			}
+		} else {
+			return NamedConfigs{}, errors.New(fmt.Sprintf("Config `%v` is not a key-value map", name))
+		}
+		namedConfigsMap[name] = h
+	}
+	return namedConfigsMap, nil
+}
+
 type NamedConfigs map[string]HostConfig
 
-type NamedHostConfigEntries map[string]HostConfigEntries
+type HostConfig map[string]interface{}
 
 func (c *NamedConfigs) toNamedHostConfigEntries() NamedHostConfigEntries {
 	entries := NamedHostConfigEntries{}
@@ -36,7 +61,7 @@ func (c *NamedConfigs) toNamedHostConfigEntries() NamedHostConfigEntries {
 	return entries
 }
 
-type HostConfig map[string]interface{}
+type NamedHostConfigEntries map[string]HostConfigEntries
 
 var sanitizer = NewSanitizer()
 
@@ -49,18 +74,7 @@ func (c *HostConfig) toSortedHostConfigEntries() HostConfigEntries {
 	return entries
 }
 
-func (c *Config) namedConfigs() (NamedConfigs, error) {
-	namedConfigsMap := NamedConfigs{}
-	for name, r := range c.RawSSHConfigs {
-		if _, err := namedConfigsMap[name]; err {
-			return NamedConfigs{}, errors.New(fmt.Sprintf("Duplicate ssh-config with name %v", name))
-		}
-		namedConfigsMap[name] = r.([]map[string]interface{})[0]
-	}
-	return namedConfigsMap, nil
-}
-
-func (c *Config) ToHostConfigInputs() ([]HostConfigInput, error) {
+func (c *HostsWithConfigs) ToHostConfigInputs() ([]HostConfigInput, error) {
 	namedConfigs, err := c.namedConfigs()
 	if err != nil {
 		return nil, err
@@ -68,42 +82,52 @@ func (c *Config) ToHostConfigInputs() ([]HostConfigInput, error) {
 	namedConfigEntries := namedConfigs.toNamedHostConfigEntries()
 	inputs := []HostConfigInput{}
 
-	aliases := map[string]Alias{}
-	for _, a := range c.Aliases {
+	aliases := map[string]Host{}
+	for _, a := range c.Hosts {
 		if _, ok := aliases[a.Name]; ok {
-			return nil, errors.New(fmt.Sprintf("Duplicate alias with name %v", a.Name))
+			return nil, errors.New(fmt.Sprintf("Duplicate host `%v`", a.Name))
 		}
 		aliases[a.Name] = a
+
 		input := HostConfigInput{
 			AliasName:       a.Name,
-			HostnamePattern: a.Pattern,
-			AliasTemplate:   a.Template,
+			HostnamePattern: a.Hostname,
+			AliasTemplate:   a.Alias,
 		}
-		if a.SSHConfigName != "" {
-			if named, ok := namedConfigEntries[a.SSHConfigName]; ok {
+		if configName, ok := a.ConfigOrRef.(string); ok {
+			if named, ok := namedConfigEntries[configName]; ok {
 				input.HostConfig = named
 			} else {
-				return nil, errors.New(fmt.Sprintf("No ssh-config named %v found (used by %v alias)",
-					a.SSHConfigName, a.Name))
+				return nil, errors.New(fmt.Sprintf("No config `%v` found (used by host `%v`)",
+					configName, a.Name))
 			}
-		} else {
-			input.HostConfig = a.SSHConfig.toSortedHostConfigEntries()
+		} else if m, ok := a.ConfigOrRef.([]map[string]interface{}); ok {
+			h := HostConfig{}
+			for _, x := range m {
+				for k, v := range x {
+					if _, ok := h[k]; ok {
+						return nil, errors.New(fmt.Sprintf("Duplicate config property `%v` for host `%v`", k, a.Name))
+					}
+					h[k] = v
+				}
+			}
+			input.HostConfig = h.toSortedHostConfigEntries()
 		}
 		inputs = append(inputs, input)
 	}
 	return inputs, nil
 }
 
-func (c *Config) Merge(config Config) error {
-	c.Aliases = append(c.Aliases, config.Aliases...)
+func (c *HostsWithConfigs) Merge(config HostsWithConfigs) error {
+	c.Hosts = append(c.Hosts, config.Hosts...)
 	if c.RawSSHConfigs == nil {
 		c.RawSSHConfigs = RawSSHConfigs{}
 	}
-	for k, r := range config.RawSSHConfigs {
-		if _, ok := c.RawSSHConfigs[k]; ok {
-			return errors.New(fmt.Sprintf("Duplicate ssh-config with name %s", k))
+	for n, r := range config.RawSSHConfigs {
+		if _, ok := c.RawSSHConfigs[n]; ok {
+			return errors.New(fmt.Sprintf("Duplicate config `%s`", n))
 		}
-		c.RawSSHConfigs[k] = r
+		c.RawSSHConfigs[n] = r
 	}
 	return nil
 }

@@ -17,20 +17,21 @@ func TestShouldReadCompleteConfigFromDir(t *testing.T) {
 
 	// then
 	assert.NoError(t, err)
-	assert.Equal(t, Config{
-		Aliases: []Alias{{
-			Name:          "service-a",
-			Pattern:       "service-a[1..5].example.com",
-			Template:      "a%1",
-			SSHConfigName: "service-a",
+	assert.Equal(t, HostsWithConfigs{
+		Hosts: []Host{{
+			Name:        "service-a",
+			Hostname:    "service-a[1..5].example.com",
+			Alias:       "a%1",
+			ConfigOrRef: "service-a",
 		}, {
 			Name:     "service-b",
-			Pattern:  "service-b[1..2].example.com",
-			Template: "b%1",
-			SSHConfig: HostConfig{
+			Hostname: "service-b[1..2].example.com",
+			Alias:    "b%1",
+			ConfigOrRef: []map[string]interface{}{{
 				"identity_file": "b_id_rsa.pub",
-				"port":          22,
-			},
+			}, {
+				"port": 22,
+			}},
 		}}, RawSSHConfigs: RawSSHConfigs{
 			"service-a": []map[string]interface{}{{
 				"identity_file": "a_id_rsa.pub",

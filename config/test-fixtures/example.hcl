@@ -1,19 +1,19 @@
-alias "service-a" {
-  pattern = "service-a[1..5].example.com",
-  template = "a%1"
-  ssh_config_name = "service-a"
+host "service-a" {
+  hostname = "service-a[1..5].example.com",
+  alias = "a%1"
+  config = "service-a"
 }
 
-alias "service-b" {
-  pattern = "service-b[1..2].example.com",
-  template = "b%1"
-  ssh_config = {
+host "service-b" {
+  hostname = "service-b[1..2].example.com",
+  alias = "b%1"
+  config = {
     identity_file = "b_id_rsa.pub"
     port = 22
   }
 }
 
-ssh_config "service-a" {
+config "service-a" {
   identity_file = "a_id_rsa.pub"
   port = 22
 }

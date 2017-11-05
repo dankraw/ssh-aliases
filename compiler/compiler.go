@@ -26,13 +26,13 @@ type TemplateReplacement struct {
 }
 
 func (c *Compiler) Compile(input HostConfigInput) ([]HostConfigResult, error) {
-	results := []HostConfigResult{}
+	var results []HostConfigResult
 	expanded, err := c.expander.expand(input.HostnamePattern)
 	if err != nil {
 		return nil, err
 	}
 	templateGroups := c.groupsRegexp.FindAllStringSubmatchIndex(input.AliasTemplate, -1)
-	replacements := []TemplateReplacement{}
+	var replacements []TemplateReplacement
 	for _, group := range templateGroups {
 		hostnameGroupSelect, _ := strconv.Atoi(input.AliasTemplate[group[2]:group[3]])
 		replacements = append(replacements, TemplateReplacement{group[0], group[1], hostnameGroupSelect - 1})

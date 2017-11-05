@@ -49,7 +49,7 @@ func (s ByIndex) Swap(i, j int) {
 }
 
 func (e *Expander) expand(host string) ([]ExpandedHostname, error) {
-	ranges := []ExpandingRange{}
+	var ranges []ExpandingRange
 	n := 1
 	for _, r := range e.rangeRegexp.FindAllStringSubmatchIndex(host, -1) {
 		expRange, err := e.expandingRange(host, r)
@@ -105,11 +105,11 @@ func (e *Expander) expandingRange(host string, rangeGroup []int) (ExpandingRange
 }
 
 func (e *Expander) expandedHostnames(size int, host string, ranges []ExpandingRange) ([]ExpandedHostname, error) {
-	hostnames := []ExpandedHostname{}
+	var hostnames []ExpandedHostname
 	sort.Sort(ByIndex(ranges))
 	for i := 0; i < size; i++ {
 		j := 1
-		hostnameReplacements := []string{}
+		var hostnameReplacements []string
 		produced := host[0:ranges[0].beginIdx]
 		for p, r := range ranges {
 			idx := (i / j) % len(r.values)

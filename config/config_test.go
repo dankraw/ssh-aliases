@@ -13,20 +13,20 @@ func TestShouldMapToHostConfigInputs(t *testing.T) {
 	// given
 	config := HostsWithConfigs{
 		Hosts: []Host{{
-			Name:        "service-a",
-			Hostname:    "service-a[1..5].example.com",
-			Alias:       "a%1",
-			ConfigOrRef: "service-a",
+			Name:           "service-a",
+			Hostname:       "service-a[1..5].example.com",
+			Alias:          "a%1",
+			RawConfigOrRef: "service-a",
 		}, {
 			Name:     "service-b",
 			Hostname: "service-b[1..2].example.com",
 			Alias:    "b%1",
-			ConfigOrRef: []map[string]interface{}{{
+			RawConfigOrRef: []map[string]interface{}{{
 				"identity_file": "b_id_rsa.pub",
 			}, {
 				"port": 22,
 			}},
-		}}, RawSSHConfigs: RawSSHConfigs{
+		}}, RawConfigs: RawConfigs{
 			"service-a": []map[string]interface{}{{
 				"identity_file": "a_id_rsa.pub",
 				"port":          22,
@@ -65,7 +65,7 @@ func TestShouldReturnErrorOnDuplicateKey(t *testing.T) {
 			Name:     "service-b",
 			Hostname: "service-b[1..2].example.com",
 			Alias:    "b%1",
-			ConfigOrRef: []map[string]interface{}{{
+			RawConfigOrRef: []map[string]interface{}{{
 				"identity_file": "b_id_rsa.pub",
 			}, {
 				"identity_file": "c_id_rsa.pub",
@@ -87,7 +87,7 @@ func TestShouldReturnErrorOnDuplicateKeyInRawConfigs(t *testing.T) {
 
 	// given
 	config := HostsWithConfigs{
-		RawSSHConfigs: RawSSHConfigs{
+		RawConfigs: RawConfigs{
 			"service-a": []map[string]interface{}{
 				{"identity_file": "abc"},
 				{"identity_file": "abc"},
@@ -110,10 +110,10 @@ func TestShouldReturnErrorOnNotFoundSSHConfig(t *testing.T) {
 	// given
 	config := HostsWithConfigs{
 		Hosts: []Host{{
-			Name:        "service-a",
-			Hostname:    "service-a[1..5].example.com",
-			Alias:       "a%1",
-			ConfigOrRef: "this-does-not-exists",
+			Name:           "service-a",
+			Hostname:       "service-a[1..5].example.com",
+			Alias:          "a%1",
+			RawConfigOrRef: "this-does-not-exists",
 		}},
 	}
 
@@ -134,7 +134,7 @@ func TestShouldMergeWithOtherConfig(t *testing.T) {
 		Hosts: []Host{{
 			Name: "project1",
 		}},
-		RawSSHConfigs: RawSSHConfigs{
+		RawConfigs: RawConfigs{
 			"project1-config": []map[string]interface{}{{
 				"identity_file": "a_id_rsa.pub",
 			}},
@@ -146,7 +146,7 @@ func TestShouldMergeWithOtherConfig(t *testing.T) {
 		Hosts: []Host{{
 			Name: "project2",
 		}},
-		RawSSHConfigs: RawSSHConfigs{
+		RawConfigs: RawConfigs{
 			"project2-config": []map[string]interface{}{{
 				"port": 22,
 			}},
@@ -161,7 +161,7 @@ func TestShouldMergeWithOtherConfig(t *testing.T) {
 		}, {
 			Name: "project2",
 		}},
-		RawSSHConfigs: RawSSHConfigs{
+		RawConfigs: RawConfigs{
 			"project1-config": []map[string]interface{}{{
 				"identity_file": "a_id_rsa.pub",
 			}},
@@ -177,14 +177,14 @@ func TestShouldReturnErrorOnDuplicateSSHConfigWhenMerging(t *testing.T) {
 
 	// given
 	config := HostsWithConfigs{
-		RawSSHConfigs: RawSSHConfigs{
+		RawConfigs: RawConfigs{
 			"service-a": []map[string]interface{}{{
 				"identity_file": "a_id_rsa.pub",
 			}},
 		},
 	}
 	config2 := HostsWithConfigs{
-		RawSSHConfigs: RawSSHConfigs{
+		RawConfigs: RawConfigs{
 			"service-a": []map[string]interface{}{{
 				"port": 22,
 			}},

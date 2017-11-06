@@ -28,6 +28,7 @@ func (c *CLI) ConfigureCLI() error {
 	}
 	var scanDir string
 	var save bool
+	var force bool
 	var file string
 
 	app := cli.NewApp()
@@ -69,11 +70,16 @@ func (c *CLI) ConfigureCLI() error {
 				Destination: &file,
 				Value:       filepath.Join(homeDir, ".ssh", "config"),
 			},
+			cli.BoolFlag{
+				Name:        "force",
+				Usage:       "Overwrite existing file without confirmation",
+				Destination: &force,
+			},
 		},
 		Action: func(ctx *cli.Context) error {
 			var err error
 			if save {
-				err = NewCompileSaveCommand(file).Execute(scanDir)
+				err = NewCompileSaveCommand(file).Execute(scanDir, force)
 			} else {
 				err = NewCompileCommand(os.Stdout).Execute(scanDir)
 			}

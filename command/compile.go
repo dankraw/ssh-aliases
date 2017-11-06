@@ -6,21 +6,35 @@ import (
 	"io"
 	"io/ioutil"
 
+	"os"
+
 	"github.com/dankraw/ssh-aliases/compiler"
 	"github.com/dankraw/ssh-aliases/config"
 )
 
 type CompileSaveCommand struct {
-	file string
+	file    string
+	confirm *Confirm
 }
 
 func NewCompileSaveCommand(file string) *CompileSaveCommand {
 	return &CompileSaveCommand{
-		file: file,
+		file:    file,
+		confirm: NewConfirm(os.Stdin),
 	}
 }
 
-func (c *CompileSaveCommand) Execute(dir string) error {
+func (c *CompileSaveCommand) Execute(dir string, force bool) error {
+	if !force {
+		confirmed, err := c.confirm.RequireConfirmationIfFileExists(c.file)
+		if err != nil {
+			return err
+		}
+		if !confirmed {
+			fmt.Println("File left unchanged.")
+			return nil
+		}
+	}
 	buffer := new(bytes.Buffer)
 	err := NewCompileCommand(buffer).Execute(dir)
 	if err != nil {

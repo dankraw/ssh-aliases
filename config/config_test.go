@@ -3,7 +3,7 @@ package config
 import (
 	"testing"
 
-	. "github.com/dankraw/ssh-aliases/domain"
+	"github.com/dankraw/ssh-aliases/compiler"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -38,18 +38,18 @@ func TestShouldMapToHostConfigInputs(t *testing.T) {
 
 	// then
 	assert.NoError(t, err)
-	assert.Equal(t, []HostConfigInput{{
+	assert.Equal(t, []compiler.HostConfigInput{{
 		AliasName:       "service-a",
 		HostnamePattern: "service-a[1..5].example.com",
 		AliasTemplate:   "a%1",
-		HostConfig: HostConfigEntries{
+		HostConfig: compiler.HostConfigEntries{
 			{"IdentityFile", "a_id_rsa.pub"},
 			{"Port", 22},
 		}}, {
 		AliasName:       "service-b",
 		HostnamePattern: "service-b[1..2].example.com",
 		AliasTemplate:   "b%1",
-		HostConfig: HostConfigEntries{
+		HostConfig: compiler.HostConfigEntries{
 			{"IdentityFile", "b_id_rsa.pub"},
 			{"Port", 22},
 		}},
@@ -234,7 +234,7 @@ func TestShouldSortHostConfigAndSanitizeKeywords(t *testing.T) {
 	entries := config.toSortedHostConfigEntries()
 
 	// then
-	assert.Equal(t, HostConfigEntries{
+	assert.Equal(t, compiler.HostConfigEntries{
 		{"A", 123},
 		{"B", "something"},
 		{"C", "abc"},

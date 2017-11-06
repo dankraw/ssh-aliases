@@ -3,8 +3,6 @@ package compiler
 import (
 	"regexp"
 	"strconv"
-
-	. "github.com/dankraw/ssh-aliases/domain"
 )
 
 type Compiler struct {

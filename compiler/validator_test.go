@@ -3,7 +3,6 @@ package compiler
 import (
 	"testing"
 
-	. "github.com/dankraw/ssh-aliases/domain"
 	"github.com/stretchr/testify/assert"
 )
 

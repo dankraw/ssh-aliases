@@ -1,4 +1,4 @@
-package domain
+package compiler
 
 type HostConfigInput struct {
 	AliasName       string

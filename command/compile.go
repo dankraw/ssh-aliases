@@ -8,7 +8,6 @@ import (
 
 	"github.com/dankraw/ssh-aliases/compiler"
 	"github.com/dankraw/ssh-aliases/config"
-	. "github.com/dankraw/ssh-aliases/domain"
 )
 
 type CompileSaveCommand struct {
@@ -57,7 +56,7 @@ func (c *CompileCommand) Execute(dir string) error {
 	if err != nil {
 		return err
 	}
-	allResults := []HostConfigResult{}
+	allResults := []compiler.HostConfigResult{}
 	for _, input := range inputs {
 		results, err := c.compiler.Compile(input)
 		if err != nil {
@@ -75,7 +74,7 @@ func (c *CompileCommand) Execute(dir string) error {
 	return nil
 }
 
-func (c *CompileCommand) printHostConfig(config HostConfigResult) {
+func (c *CompileCommand) printHostConfig(config compiler.HostConfigResult) {
 	fmt.Fprintf(c.writer, "Host %v\n", config.Host)
 	c.printHostConfigProperty("HostName", config.HostName)
 

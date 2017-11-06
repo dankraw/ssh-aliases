@@ -3,8 +3,6 @@ package compiler
 import (
 	"errors"
 	"fmt"
-
-	. "github.com/dankraw/ssh-aliases/domain"
 )
 
 type Validator struct{}

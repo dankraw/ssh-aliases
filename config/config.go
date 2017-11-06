@@ -6,7 +6,7 @@ import (
 
 	"sort"
 
-	. "github.com/dankraw/ssh-aliases/domain"
+	"github.com/dankraw/ssh-aliases/compiler"
 )
 
 type HostsWithConfigs struct {
@@ -61,26 +61,26 @@ func (c *HostConfigsMap) toHostConfigEntriesMap() HostConfigEntriesMap {
 	return entries
 }
 
-type HostConfigEntriesMap map[string]HostConfigEntries
+type HostConfigEntriesMap map[string]compiler.HostConfigEntries
 
 var sanitizer = NewSanitizer()
 
-func (c *HostConfig) toSortedHostConfigEntries() HostConfigEntries {
-	var entries []HostConfigEntry
+func (c *HostConfig) toSortedHostConfigEntries() compiler.HostConfigEntries {
+	var entries []compiler.HostConfigEntry
 	for k, v := range *c {
-		entries = append(entries, HostConfigEntry{sanitizer.Sanitize(k), v})
+		entries = append(entries, compiler.HostConfigEntry{sanitizer.Sanitize(k), v})
 	}
-	sort.Sort(ByHostConfigEntryKey(entries))
+	sort.Sort(compiler.ByHostConfigEntryKey(entries))
 	return entries
 }
 
-func (c *HostsWithConfigs) ToHostConfigInputs() ([]HostConfigInput, error) {
+func (c *HostsWithConfigs) ToHostConfigInputs() ([]compiler.HostConfigInput, error) {
 	configsMap, err := c.hostConfigsMap()
 	if err != nil {
 		return nil, err
 	}
 	namedConfigEntries := configsMap.toHostConfigEntriesMap()
-	var inputs []HostConfigInput
+	var inputs []compiler.HostConfigInput
 
 	aliases := map[string]Host{}
 	for _, a := range c.Hosts {
@@ -89,7 +89,7 @@ func (c *HostsWithConfigs) ToHostConfigInputs() ([]HostConfigInput, error) {
 		}
 		aliases[a.Name] = a
 
-		input := HostConfigInput{
+		input := compiler.HostConfigInput{
 			AliasName:       a.Name,
 			HostnamePattern: a.Hostname,
 			AliasTemplate:   a.Alias,

@@ -31,7 +31,7 @@ func (c *Confirm) RequireConfirmationIfFileExists(path string) (bool, error) {
 }
 func (c *Confirm) confirmation(path string) (bool, error) {
 	r := bufio.NewReader(c.reader)
-	fmt.Printf("File %s already exists. Overwrite? (Y/n)\n", path)
+	fmt.Printf("File `%s` already exists. Overwrite? (Y/n)\n", path)
 	response, err := r.ReadString('\n')
 	if err != nil {
 		return false, err
@@ -51,7 +51,7 @@ func (c *Confirm) fileExists(path string) (bool, error) {
 		return false, err
 	}
 	if info.IsDir() {
-		return true, errors.New(fmt.Sprintf("Path %s is a directory", path))
+		return true, errors.New(fmt.Sprintf("Path `%s` is a directory", path))
 	}
 	return true, nil
 }

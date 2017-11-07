@@ -69,7 +69,7 @@ func TestShouldReturnErrorWhenProducedStringIsNotAValidHostname(t *testing.T) {
 
 	// then
 	assert.Error(t, err)
-	assert.Equal(t, "Produced string '--ddd--1...' is not a valid Hostname", err.Error())
+	assert.Equal(t, "Produced string `--ddd--1...` is not a valid Hostname", err.Error())
 }
 
 func TestShouldReturnErrorWhenNoRangeWasFoundAndProducedStringIsNotAValidHostname(t *testing.T) {
@@ -83,7 +83,7 @@ func TestShouldReturnErrorWhenNoRangeWasFoundAndProducedStringIsNotAValidHostnam
 
 	// then
 	assert.Error(t, err)
-	assert.Equal(t, "Produced string '--ddd--[1..2...' is not a valid Hostname", err.Error())
+	assert.Equal(t, "Produced string `--ddd--[1..2...` is not a valid Hostname", err.Error())
 }
 
 func TestShouldExpandHostnameWithMultipleRanges(t *testing.T) {

@@ -70,7 +70,7 @@ func (e *Expander) expand(host string) ([]ExpandedHostname, error) {
 	}
 	if len(ranges) == 0 {
 		if !e.hostnameRegexp.MatchString(host) {
-			return nil, errors.New(fmt.Sprintf("Produced string '%v' is not a valid Hostname", host))
+			return nil, errors.New(fmt.Sprintf("Produced string `%v` is not a valid Hostname", host))
 		}
 		return []ExpandedHostname{{Hostname: host}}, nil
 	}
@@ -125,7 +125,7 @@ func (e *Expander) expandedHostnames(size int, host string, ranges []ExpandingRa
 			hostnameReplacements = append(hostnameReplacements, value)
 		}
 		if !e.hostnameRegexp.MatchString(produced) {
-			return nil, errors.New(fmt.Sprintf("Produced string '%v' is not a valid Hostname", produced))
+			return nil, errors.New(fmt.Sprintf("Produced string `%v` is not a valid Hostname", produced))
 		}
 		hostnames = append(hostnames, ExpandedHostname{
 			Hostname:     produced,

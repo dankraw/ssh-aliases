@@ -40,7 +40,7 @@ func TestDirExists(t *testing.T) {
 	// then
 	assert.True(t, exists)
 	assert.Error(t, err)
-	assert.Equal(t, fmt.Sprintf("Path %s is a directory", fixtureDir), err.Error())
+	assert.Equal(t, fmt.Sprintf("Path `%s` is a directory", fixtureDir), err.Error())
 }
 
 func TestInvalidPath(t *testing.T) {

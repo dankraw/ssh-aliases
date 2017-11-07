@@ -16,7 +16,7 @@ func (v *Validator) ValidateResults(results []HostConfigResult) error {
 	var exists struct{}
 	for _, r := range results {
 		if _, contains := aliases[r.Host]; contains {
-			return errors.New(fmt.Sprintf("Generated results contain duplicate alias: %v", r.Host))
+			return errors.New(fmt.Sprintf("Generated results contain duplicate alias: `%v`", r.Host))
 		}
 		aliases[r.Host] = exists
 	}

@@ -21,5 +21,5 @@ func TestValidate(t *testing.T) {
 
 	// then
 	assert.Error(t, err)
-	assert.Equal(t, "Generated results contain duplicate alias: is_unique", err.Error())
+	assert.Equal(t, "Generated results contain duplicate alias: `is_unique`", err.Error())
 }

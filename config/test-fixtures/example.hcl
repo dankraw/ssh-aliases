@@ -8,12 +8,12 @@ host "service-b" {
   hostname = "service-b[1..2].example.com",
   alias = "b%1"
   config = {
-    identity_file = "b_id_rsa.pub"
+    identity_file = "b_id_rsa.pem"
     port = 22
   }
 }
 
 config "service-a" {
-  identity_file = "a_id_rsa.pub"
+  identity_file = "a_id_rsa.pem"
   port = 22
 }

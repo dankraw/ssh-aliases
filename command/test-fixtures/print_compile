@@ -1,28 +1,48 @@
-Host c1
-     HostName service-c1.example.com
-     IdentityFile c_id_rsa.pub
+Host myservice1
+     HostName instance1.my-service.example.com
+     IdentityFile my_service.pem
 
-Host c2
-     HostName service-c2.example.com
-     IdentityFile c_id_rsa.pub
+Host myservice2
+     HostName instance2.my-service.example.com
+     IdentityFile my_service.pem
 
-Host a1
-     HostName service-a1.example.com
-     IdentityFile id_rsa.pub
+Host consul1-dc1
+     HostName consul1.dc1.example.com
+     IdentityFile some_file.pem
+     User ubuntu
+
+Host consul2-dc1
+     HostName consul2.dc1.example.com
+     IdentityFile some_file.pem
+     User ubuntu
+
+Host consul3-dc1
+     HostName consul3.dc1.example.com
+     IdentityFile some_file.pem
+     User ubuntu
+
+Host consul1-dc2
+     HostName consul1.dc2.example.com
+     IdentityFile some_file.pem
+     User ubuntu
+
+Host consul2-dc2
+     HostName consul2.dc2.example.com
+     IdentityFile some_file.pem
+     User ubuntu
+
+Host consul3-dc2
+     HostName consul3.dc2.example.com
+     IdentityFile some_file.pem
+     User ubuntu
+
+Host front1
+     HostName frontend1.example.com
+     IdentityFile id_rsa.pem
      Port 22
 
-Host a2
-     HostName service-a2.example.com
-     IdentityFile id_rsa.pub
-     Port 22
-
-Host b1
-     HostName service-b1.example.com
-     IdentityFile id_rsa.pub
-     Port 22
-
-Host b2
-     HostName service-b2.example.com
-     IdentityFile id_rsa.pub
+Host front2
+     HostName frontend2.example.com
+     IdentityFile id_rsa.pem
      Port 22
 

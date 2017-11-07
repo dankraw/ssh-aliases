@@ -1,16 +1,19 @@
-host "service-a" {
-  hostname = "service-a[1..2].example.com",
-  alias = "a%1"
-  config = "global"
+host "consul" {
+  hostname = "consul[1..3].[dc1|dc2].example.com",
+  alias = "consul%1-%2"
+  config = {
+    identity_file = "some_file.pem"
+    user = "ubuntu"
+  }
 }
 
-host "service-b" {
-  hostname = "service-b[1..2].example.com",
-  alias = "b%1"
+host "frontend" {
+  hostname = "frontend[1..2].example.com",
+  alias = "front%1"
   config = "global"
 }
 
 config "global" {
-  identity_file = "id_rsa.pub"
+  identity_file = "id_rsa.pem"
   port = 22
 }

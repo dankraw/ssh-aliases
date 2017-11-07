@@ -31,13 +31,13 @@ func TestShouldDecodeConfig(t *testing.T) {
 			Hostname: "service-b[1..2].example.com",
 			Alias:    "b%1",
 			RawConfigOrRef: []map[string]interface{}{{
-				"identity_file": "b_id_rsa.pub",
+				"identity_file": "b_id_rsa.pem",
 			}, {
 				"port": 22,
 			}},
 		}}, RawConfigs: RawConfigs{
 			"service-a": []map[string]interface{}{{
-				"identity_file": "a_id_rsa.pub",
+				"identity_file": "a_id_rsa.pem",
 				"port":          22,
 			}},
 		},

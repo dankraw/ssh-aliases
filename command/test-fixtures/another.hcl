@@ -1,7 +1,7 @@
-host "service-c" {
-  hostname = "service-c[1..2].example.com",
-  alias = "c%1"
+host "my-service" {
+  hostname = "instance[1..2].my-service.example.com",
+  alias = "myservice%1"
   config = {
-    identity_file = "c_id_rsa.pub"
+    identity_file = "my_service.pem"
   }
 }

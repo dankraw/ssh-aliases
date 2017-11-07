@@ -1,11 +1,3 @@
-Host myservice1
-     HostName instance1.my-service.example.com
-     IdentityFile my_service.pem
-
-Host myservice2
-     HostName instance2.my-service.example.com
-     IdentityFile my_service.pem
-
 Host consul1-dc1
      HostName consul1.dc1.example.com
      IdentityFile some_file.pem
@@ -45,4 +37,12 @@ Host front2
      HostName frontend2.example.com
      IdentityFile id_rsa.pem
      Port 22
+
+Host myservice1
+     HostName instance1.my-service.example.com
+     IdentityFile my_service.pem
+
+Host myservice2
+     HostName instance2.my-service.example.com
+     IdentityFile my_service.pem
 

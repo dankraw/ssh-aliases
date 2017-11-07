@@ -1,10 +1,4 @@
-test-fixtures/another.hcl (1):
-
- my-service (2):
-  myservice1: instance1.my-service.example.com
-  myservice2: instance2.my-service.example.com
-
-test-fixtures/example.hcl (2):
+test-fixtures/consul_and_frontend.hcl (2):
 
  consul (6):
   consul1-dc1: consul1.dc1.example.com
@@ -17,3 +11,9 @@ test-fixtures/example.hcl (2):
  frontend (2):
   front1: frontend1.example.com
   front2: frontend2.example.com
+
+test-fixtures/my_service.hcl (1):
+
+ my-service (2):
+  myservice1: instance1.my-service.example.com
+  myservice2: instance2.my-service.example.com

@@ -21,6 +21,6 @@ func TestCompileCommandExecute(t *testing.T) {
 
 	// then
 	assert.NoError(t, err)
-	output, _ := ioutil.ReadFile(filepath.Join(fixtureDir, "print_compile"))
+	output, _ := ioutil.ReadFile(filepath.Join(fixtureDir, "compile_result"))
 	assert.Equal(t, string(output), buffer.String())
 }

@@ -24,7 +24,7 @@ func TestListCommandExecute(t *testing.T) {
 
 	// then
 	assert.NoError(t, err)
-	output, _ := ioutil.ReadFile(filepath.Join(fixtureDir, "print_list"))
+	output, _ := ioutil.ReadFile(filepath.Join(fixtureDir, "list_result"))
 	assert.Equal(t, string(output), buffer.String())
 
 }

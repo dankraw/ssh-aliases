@@ -1,0 +1,36 @@
+Host dev.abc1
+     HostName node1.abc.dev.example.com
+     IdentityFile ~/.ssh/abc.pem
+     Port 22
+     User ubuntu
+
+Host dev.abc2
+     HostName node2.abc.dev.example.com
+     IdentityFile ~/.ssh/abc.pem
+     Port 22
+     User ubuntu
+
+Host test.abc1
+     HostName node1.abc.test.example.com
+     IdentityFile ~/.ssh/abc.pem
+     Port 22
+     User ubuntu
+
+Host test.abc2
+     HostName node2.abc.test.example.com
+     IdentityFile ~/.ssh/abc.pem
+     Port 22
+     User ubuntu
+
+Host other1
+     HostName other1.example.com
+     IdentityFile ~/.ssh/other.pem
+     Port 22
+     User lurker
+
+Host other2
+     HostName other2.example.com
+     IdentityFile ~/.ssh/other.pem
+     Port 22
+     User lurker
+

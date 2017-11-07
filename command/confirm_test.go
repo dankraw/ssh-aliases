@@ -13,7 +13,7 @@ func TestFileExists(t *testing.T) {
 	t.Parallel()
 
 	// when
-	exists, err := NewConfirm(os.Stdin).fileExists(filepath.Join(fixtureDir, "print_list"))
+	exists, err := NewConfirm(os.Stdin).fileExists(filepath.Join(fixtureDir, "list_result"))
 
 	// then
 	assert.True(t, exists)
@@ -75,7 +75,7 @@ func TestConfirm(t *testing.T) {
 
 	// when
 	reader := NewTestReader("Y\n")
-	confirmed, err := NewConfirm(reader).RequireConfirmationIfFileExists(filepath.Join(fixtureDir, "print_list"))
+	confirmed, err := NewConfirm(reader).RequireConfirmationIfFileExists(filepath.Join(fixtureDir, "list_result"))
 
 	// then
 	assert.True(t, confirmed)
@@ -87,7 +87,7 @@ func TestGiveUp(t *testing.T) {
 
 	// when
 	reader := NewTestReader("nope\n")
-	confirmed, err := NewConfirm(reader).RequireConfirmationIfFileExists(filepath.Join(fixtureDir, "print_list"))
+	confirmed, err := NewConfirm(reader).RequireConfirmationIfFileExists(filepath.Join(fixtureDir, "list_result"))
 
 	// then
 	assert.False(t, confirmed)

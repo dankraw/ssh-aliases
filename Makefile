@@ -1,8 +1,8 @@
 build: test
-	go build -o bin/ssh-aliases
+	go build -o bin/ssh-aliases -ldflags "-s -w"
 
 test:
-	go test -v -cover ./...
+	go test -cover ./...
 
 release: build
 	bash ./package.sh

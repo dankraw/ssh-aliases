@@ -10,11 +10,11 @@ func TestCompile(t *testing.T) {
 	t.Parallel()
 
 	// given
-	sshConfig := HostConfigEntries{{"identity_file", "~/.ssh/id_rsa"}}
-	input := HostConfigInput{
+	sshConfig := ConfigProperties{{"identity_file", "~/.ssh/id_rsa"}}
+	input := ExpandingHostConfig{
 		HostnamePattern: "x-master[1..2].myproj-prod.dc1.net",
 		AliasTemplate:   "host{#1}-dc1",
-		HostConfig:      sshConfig,
+		Config:          sshConfig,
 	}
 
 	// when
@@ -22,14 +22,14 @@ func TestCompile(t *testing.T) {
 
 	// then
 	assert.NoError(t, err)
-	assert.Equal(t, []HostConfigResult{{
-		Host:       "host1-dc1",
-		HostName:   "x-master1.myproj-prod.dc1.net",
-		HostConfig: sshConfig,
+	assert.Equal(t, []HostEntity{{
+		Host:     "host1-dc1",
+		HostName: "x-master1.myproj-prod.dc1.net",
+		Config:   sshConfig,
 	}, {
-		Host:       "host2-dc1",
-		HostName:   "x-master2.myproj-prod.dc1.net",
-		HostConfig: sshConfig,
+		Host:     "host2-dc1",
+		HostName: "x-master2.myproj-prod.dc1.net",
+		Config:   sshConfig,
 	}}, results)
 }
 
@@ -37,7 +37,7 @@ func TestShouldReplaceAllGroupMatchOccurrences(t *testing.T) {
 	t.Parallel()
 
 	// given
-	input := HostConfigInput{
+	input := ExpandingHostConfig{
 		HostnamePattern: "x-[master1].myproj-prod.dc1.net",
 		AliasTemplate:   "{#1}-{#1}-{#1}",
 	}
@@ -55,7 +55,7 @@ func TestShouldExpandHostnameWithProvidedRange(t *testing.T) {
 	t.Parallel()
 
 	// given
-	input := HostConfigInput{
+	input := ExpandingHostConfig{
 		HostnamePattern: "x-master[4..6].myproj-prod.dc1.net",
 		AliasTemplate:   "m{#1}",
 	}
@@ -65,7 +65,7 @@ func TestShouldExpandHostnameWithProvidedRange(t *testing.T) {
 
 	// then
 	assert.NoError(t, err)
-	assert.Equal(t, []HostConfigResult{{
+	assert.Equal(t, []HostEntity{{
 		Host:     "m4",
 		HostName: "x-master4.myproj-prod.dc1.net",
 	}, {
@@ -81,7 +81,7 @@ func TestShouldAllowStaticAliasDefinitions(t *testing.T) {
 	t.Parallel()
 
 	// given
-	input := HostConfigInput{
+	input := ExpandingHostConfig{
 		HostnamePattern: "x-master1.myproj-prod.dc1.net",
 		AliasTemplate:   "master1",
 	}

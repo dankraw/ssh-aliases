@@ -10,7 +10,7 @@ func TestValidate(t *testing.T) {
 	t.Parallel()
 
 	// given
-	results := []HostConfigResult{{
+	results := []HostEntity{{
 		Host: "is_unique",
 	}, {
 		Host: "is_unique",

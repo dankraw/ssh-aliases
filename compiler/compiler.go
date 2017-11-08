@@ -23,8 +23,8 @@ type TemplateReplacement struct {
 	replacementIdx int
 }
 
-func (c *Compiler) Compile(input HostConfigInput) ([]HostConfigResult, error) {
-	var results []HostConfigResult
+func (c *Compiler) Compile(input ExpandingHostConfig) ([]HostEntity, error) {
+	var results []HostEntity
 	expanded, err := c.expander.expand(input.HostnamePattern)
 	if err != nil {
 		return nil, err
@@ -36,10 +36,10 @@ func (c *Compiler) Compile(input HostConfigInput) ([]HostConfigResult, error) {
 		replacements = append(replacements, TemplateReplacement{group[0], group[1], hostnameGroupSelect - 1})
 	}
 	for _, h := range expanded {
-		results = append(results, HostConfigResult{
-			Host:       c.compileToTargetHost(input.AliasTemplate, replacements, h),
-			HostName:   h.Hostname,
-			HostConfig: input.HostConfig,
+		results = append(results, HostEntity{
+			Host:     c.compileToTargetHost(input.AliasTemplate, replacements, h),
+			HostName: h.Hostname,
+			Config:   input.Config,
 		})
 	}
 	return results, nil

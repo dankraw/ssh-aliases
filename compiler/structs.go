@@ -1,35 +1,35 @@
 package compiler
 
-type HostConfigInput struct {
+type ExpandingHostConfig struct {
 	AliasName       string
 	HostnamePattern string
 	AliasTemplate   string
-	HostConfig      HostConfigEntries
+	Config          ConfigProperties
 }
 
-type HostConfigResult struct {
-	Host       string
-	HostName   string
-	HostConfig HostConfigEntries
+type HostEntity struct {
+	Host     string
+	HostName string
+	Config   ConfigProperties
 }
 
-type HostConfigEntries []HostConfigEntry
+type ConfigProperties []ConfigProperty
 
-type HostConfigEntry struct {
+type ConfigProperty struct {
 	Key   string
 	Value interface{}
 }
 
-type ByHostConfigEntryKey []HostConfigEntry
+type ByConfigPropertyKey []ConfigProperty
 
-func (s ByHostConfigEntryKey) Len() int {
+func (s ByConfigPropertyKey) Len() int {
 	return len(s)
 }
 
-func (s ByHostConfigEntryKey) Less(i, j int) bool {
+func (s ByConfigPropertyKey) Less(i, j int) bool {
 	return s[i].Key < s[j].Key
 }
 
-func (s ByHostConfigEntryKey) Swap(i, j int) {
+func (s ByConfigPropertyKey) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }

@@ -17,7 +17,7 @@ func TestShouldReadCompleteConfigFromDir(t *testing.T) {
 
 	// then
 	assert.NoError(t, err)
-	assert.Equal(t, HostsWithConfigs{
+	assert.Equal(t, RawConfigContext{
 		Hosts: []Host{{
 			Name:           "service-a",
 			Hostname:       "service-a[1..5].example.com",
@@ -33,7 +33,7 @@ func TestShouldReadCompleteConfigFromDir(t *testing.T) {
 				"port": 22,
 			}},
 		}}, RawConfigs: RawConfigs{
-			"service-a": []map[string]interface{}{{
+			"service-a": RawConfig{{
 				"identity_file": "a_id_rsa.pem",
 				"port":          22,
 			}}},

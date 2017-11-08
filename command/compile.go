@@ -66,11 +66,11 @@ func (c *CompileCommand) Execute(dir string) error {
 	if err != nil {
 		return err
 	}
-	inputs, err := config.ToHostConfigInputs()
+	inputs, err := config.ToExpandingHostConfigs()
 	if err != nil {
 		return err
 	}
-	allResults := []compiler.HostConfigResult{}
+	allResults := []compiler.HostEntity{}
 	for _, input := range inputs {
 		results, err := c.compiler.Compile(input)
 		if err != nil {
@@ -88,11 +88,11 @@ func (c *CompileCommand) Execute(dir string) error {
 	return nil
 }
 
-func (c *CompileCommand) printHostConfig(config compiler.HostConfigResult) {
+func (c *CompileCommand) printHostConfig(config compiler.HostEntity) {
 	fmt.Fprintf(c.writer, "Host %v\n", config.Host)
 	c.printHostConfigProperty("HostName", config.HostName)
 
-	for _, e := range config.HostConfig {
+	for _, e := range config.Config {
 		c.printHostConfigProperty(e.Key, e.Value)
 	}
 	fmt.Fprintln(c.writer)

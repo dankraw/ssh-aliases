@@ -9,7 +9,7 @@ import (
 	"github.com/dankraw/ssh-aliases/compiler"
 )
 
-type HostsWithConfigs struct {
+type RawConfigContext struct {
 	Hosts      []Host     `hcl:"host"`
 	RawConfigs RawConfigs `hcl:"config"`
 }
@@ -23,64 +23,51 @@ type Host struct {
 
 type RawConfigOrRef interface{}
 
-type RawConfigs map[string]interface{}
+type RawConfigs map[string]RawConfig
 
-func (c *HostsWithConfigs) hostConfigsMap() (HostConfigsMap, error) {
-	namedConfigsMap := HostConfigsMap{}
+type RawConfig []Config
+
+type Config map[string]interface{}
+
+func (c *RawConfigContext) toConfigPropertiesMap() (configPropertiesMap, error) {
+	propsMap := configPropertiesMap{}
 	for name, r := range c.RawConfigs {
-		if _, err := namedConfigsMap[name]; err {
-			return HostConfigsMap{}, errors.New(fmt.Sprintf("Duplicate config with name %v", name))
+		if _, exists := propsMap[name]; exists {
+			return configPropertiesMap{}, errors.New(fmt.Sprintf("Duplicate config with name %v", name))
 		}
-		h := HostConfig{}
-		if m, ok := r.([]map[string]interface{}); ok {
-			for _, x := range m {
-				for k, v := range x {
-					if _, ok := h[k]; ok {
-						return HostConfigsMap{}, errors.New(fmt.Sprintf("Duplicate config entry `%v` in host `%v`", k, name))
-					}
-					h[k] = v
+		h := Config{}
+		for _, x := range r {
+			for k, v := range x {
+				if _, ok := h[k]; ok {
+					return configPropertiesMap{}, errors.New(fmt.Sprintf("Duplicate config entry `%v` in host `%v`", k, name))
 				}
+				h[k] = v
 			}
-		} else {
-			return HostConfigsMap{}, errors.New(fmt.Sprintf("Config `%v` is not a key-value map", name))
 		}
-		namedConfigsMap[name] = h
+		propsMap[name] = h.toSortedProperties()
 	}
-	return namedConfigsMap, nil
+	return propsMap, nil
 }
 
-type HostConfigsMap map[string]HostConfig
+type configPropertiesMap map[string]compiler.ConfigProperties
 
-type HostConfig map[string]interface{}
+var sanitizer = NewKeywordSanitizer()
 
-func (c *HostConfigsMap) toHostConfigEntriesMap() HostConfigEntriesMap {
-	entries := HostConfigEntriesMap{}
-	for n, config := range *c {
-		entries[n] = config.toSortedHostConfigEntries()
-	}
-	return entries
-}
-
-type HostConfigEntriesMap map[string]compiler.HostConfigEntries
-
-var sanitizer = NewSanitizer()
-
-func (c *HostConfig) toSortedHostConfigEntries() compiler.HostConfigEntries {
-	var entries []compiler.HostConfigEntry
+func (c *Config) toSortedProperties() compiler.ConfigProperties {
+	var entries []compiler.ConfigProperty
 	for k, v := range *c {
-		entries = append(entries, compiler.HostConfigEntry{sanitizer.Sanitize(k), v})
+		entries = append(entries, compiler.ConfigProperty{sanitizer.Sanitize(k), v})
 	}
-	sort.Sort(compiler.ByHostConfigEntryKey(entries))
+	sort.Sort(compiler.ByConfigPropertyKey(entries))
 	return entries
 }
 
-func (c *HostsWithConfigs) ToHostConfigInputs() ([]compiler.HostConfigInput, error) {
-	configsMap, err := c.hostConfigsMap()
+func (c *RawConfigContext) ToExpandingHostConfigs() ([]compiler.ExpandingHostConfig, error) {
+	configsMap, err := c.toConfigPropertiesMap()
 	if err != nil {
 		return nil, err
 	}
-	namedConfigEntries := configsMap.toHostConfigEntriesMap()
-	var inputs []compiler.HostConfigInput
+	var inputs []compiler.ExpandingHostConfig
 
 	aliases := map[string]Host{}
 	for _, a := range c.Hosts {
@@ -89,20 +76,20 @@ func (c *HostsWithConfigs) ToHostConfigInputs() ([]compiler.HostConfigInput, err
 		}
 		aliases[a.Name] = a
 
-		input := compiler.HostConfigInput{
+		input := compiler.ExpandingHostConfig{
 			AliasName:       a.Name,
 			HostnamePattern: a.Hostname,
 			AliasTemplate:   a.Alias,
 		}
 		if configName, ok := a.RawConfigOrRef.(string); ok {
-			if named, ok := namedConfigEntries[configName]; ok {
-				input.HostConfig = named
+			if named, ok := configsMap[configName]; ok {
+				input.Config = named
 			} else {
 				return nil, errors.New(fmt.Sprintf("No config `%v` found (used by host `%v`)",
 					configName, a.Name))
 			}
 		} else if m, ok := a.RawConfigOrRef.([]map[string]interface{}); ok {
-			h := HostConfig{}
+			h := Config{}
 			for _, x := range m {
 				for k, v := range x {
 					if _, ok := h[k]; ok {
@@ -111,14 +98,16 @@ func (c *HostsWithConfigs) ToHostConfigInputs() ([]compiler.HostConfigInput, err
 					h[k] = v
 				}
 			}
-			input.HostConfig = h.toSortedHostConfigEntries()
+			input.Config = h.toSortedProperties()
+		} else {
+			return nil, errors.New(fmt.Sprintf("Invalid config definition for host `%v`", a.Name))
 		}
 		inputs = append(inputs, input)
 	}
 	return inputs, nil
 }
 
-func (c *HostsWithConfigs) Merge(config HostsWithConfigs) error {
+func (c *RawConfigContext) Merge(config RawConfigContext) error {
 	c.Hosts = append(c.Hosts, config.Hosts...)
 	if c.RawConfigs == nil {
 		c.RawConfigs = RawConfigs{}

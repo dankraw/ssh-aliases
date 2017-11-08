@@ -37,15 +37,15 @@ func (e *ListCommand) Execute(dir string) error {
 		if err != nil {
 			return err
 		}
-		inputs, err := config.ToHostConfigInputs()
+		inputs, err := config.ToExpandingHostConfigs()
 		if err != nil {
 			return err
 		}
-		file_delimiter := ""
+		fileDelimiter := ""
 		if i > 0 {
-			file_delimiter = "\n"
+			fileDelimiter = "\n"
 		}
-		white.Fprint(e.writer, file_delimiter+f)
+		white.Fprint(e.writer, fileDelimiter+f)
 		fmt.Fprintf(e.writer, " (%d):\n", len(inputs))
 		for _, input := range inputs {
 			results, err := e.compiler.Compile(input)

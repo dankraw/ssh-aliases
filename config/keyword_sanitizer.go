@@ -2,13 +2,13 @@ package config
 
 import "strings"
 
-type Sanitizer struct{}
+type KeywordSanitizer struct{}
 
-func NewSanitizer() *Sanitizer {
-	return &Sanitizer{}
+func NewKeywordSanitizer() *KeywordSanitizer {
+	return &KeywordSanitizer{}
 }
 
-func (s *Sanitizer) Sanitize(keyword string) string {
+func (s *KeywordSanitizer) Sanitize(keyword string) string {
 	withSpaces := strings.Replace(keyword, "_", " ", -1)
 	titled := strings.Title(withSpaces)
 	return strings.Replace(titled, " ", "", -1)

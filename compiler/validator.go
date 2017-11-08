@@ -11,7 +11,7 @@ func NewValidator() *Validator {
 	return &Validator{}
 }
 
-func (v *Validator) ValidateResults(results []HostConfigResult) error {
+func (v *Validator) ValidateResults(results []HostEntity) error {
 	aliases := make(map[string]struct{})
 	var exists struct{}
 	for _, r := range results {

@@ -10,7 +10,7 @@ func TestShouldSanitizeKeywords(t *testing.T) {
 	t.Parallel()
 
 	// given
-	compiler := NewSanitizer()
+	compiler := NewKeywordSanitizer()
 	entries := []struct {
 		input    string
 		expected string

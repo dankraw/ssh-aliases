@@ -11,7 +11,7 @@ func TestShouldMapToHostConfigInputs(t *testing.T) {
 	t.Parallel()
 
 	// given
-	config := HostsWithConfigs{
+	config := RawConfigContext{
 		Hosts: []Host{{
 			Name:           "service-a",
 			Hostname:       "service-a[1..5].example.com",
@@ -27,29 +27,29 @@ func TestShouldMapToHostConfigInputs(t *testing.T) {
 				"port": 22,
 			}},
 		}}, RawConfigs: RawConfigs{
-			"service-a": []map[string]interface{}{{
+			"service-a": RawConfig{{
 				"identity_file": "a_id_rsa.pub",
 				"port":          22,
 			}}},
 	}
 
 	// when
-	inputs, err := config.ToHostConfigInputs()
+	inputs, err := config.ToExpandingHostConfigs()
 
 	// then
 	assert.NoError(t, err)
-	assert.Equal(t, []compiler.HostConfigInput{{
+	assert.Equal(t, []compiler.ExpandingHostConfig{{
 		AliasName:       "service-a",
 		HostnamePattern: "service-a[1..5].example.com",
 		AliasTemplate:   "a%1",
-		HostConfig: compiler.HostConfigEntries{
+		Config: compiler.ConfigProperties{
 			{"IdentityFile", "a_id_rsa.pub"},
 			{"Port", 22},
 		}}, {
 		AliasName:       "service-b",
 		HostnamePattern: "service-b[1..2].example.com",
 		AliasTemplate:   "b%1",
-		HostConfig: compiler.HostConfigEntries{
+		Config: compiler.ConfigProperties{
 			{"IdentityFile", "b_id_rsa.pub"},
 			{"Port", 22},
 		}},
@@ -60,7 +60,7 @@ func TestShouldReturnErrorOnDuplicateKey(t *testing.T) {
 	t.Parallel()
 
 	// given
-	config := HostsWithConfigs{
+	config := RawConfigContext{
 		Hosts: []Host{{
 			Name:     "service-b",
 			Hostname: "service-b[1..2].example.com",
@@ -70,11 +70,10 @@ func TestShouldReturnErrorOnDuplicateKey(t *testing.T) {
 			}, {
 				"identity_file": "c_id_rsa.pub",
 			}},
-		}},
-	}
+		}}}
 
 	// when
-	inputs, err := config.ToHostConfigInputs()
+	inputs, err := config.ToExpandingHostConfigs()
 
 	// then
 	assert.Error(t, err)
@@ -86,9 +85,9 @@ func TestShouldReturnErrorOnDuplicateKeyInRawConfigs(t *testing.T) {
 	t.Parallel()
 
 	// given
-	config := HostsWithConfigs{
+	config := RawConfigContext{
 		RawConfigs: RawConfigs{
-			"service-a": []map[string]interface{}{
+			"service-a": RawConfig{
 				{"identity_file": "abc"},
 				{"identity_file": "abc"},
 			},
@@ -96,7 +95,7 @@ func TestShouldReturnErrorOnDuplicateKeyInRawConfigs(t *testing.T) {
 	}
 
 	// when
-	inputs, err := config.ToHostConfigInputs()
+	inputs, err := config.ToExpandingHostConfigs()
 
 	// then
 	assert.Error(t, err)
@@ -108,7 +107,7 @@ func TestShouldReturnErrorOnNotFoundSSHConfig(t *testing.T) {
 	t.Parallel()
 
 	// given
-	config := HostsWithConfigs{
+	config := RawConfigContext{
 		Hosts: []Host{{
 			Name:           "service-a",
 			Hostname:       "service-a[1..5].example.com",
@@ -118,7 +117,7 @@ func TestShouldReturnErrorOnNotFoundSSHConfig(t *testing.T) {
 	}
 
 	// when
-	results, err := config.ToHostConfigInputs()
+	results, err := config.ToExpandingHostConfigs()
 
 	// then
 	assert.Nil(t, results)
@@ -130,24 +129,24 @@ func TestShouldMergeWithOtherConfig(t *testing.T) {
 	t.Parallel()
 
 	// given
-	config := HostsWithConfigs{
+	config := RawConfigContext{
 		Hosts: []Host{{
 			Name: "project1",
 		}},
 		RawConfigs: RawConfigs{
-			"project1-config": []map[string]interface{}{{
+			"project1-config": RawConfig{{
 				"identity_file": "a_id_rsa.pub",
 			}},
 		},
 	}
 
 	// when
-	err := config.Merge(HostsWithConfigs{
+	err := config.Merge(RawConfigContext{
 		Hosts: []Host{{
 			Name: "project2",
 		}},
 		RawConfigs: RawConfigs{
-			"project2-config": []map[string]interface{}{{
+			"project2-config": RawConfig{{
 				"port": 22,
 			}},
 		},
@@ -155,17 +154,17 @@ func TestShouldMergeWithOtherConfig(t *testing.T) {
 
 	// then
 	assert.NoError(t, err)
-	assert.Equal(t, HostsWithConfigs{
+	assert.Equal(t, RawConfigContext{
 		Hosts: []Host{{
 			Name: "project1",
 		}, {
 			Name: "project2",
 		}},
 		RawConfigs: RawConfigs{
-			"project1-config": []map[string]interface{}{{
+			"project1-config": RawConfig{{
 				"identity_file": "a_id_rsa.pub",
 			}},
-			"project2-config": []map[string]interface{}{{
+			"project2-config": RawConfig{{
 				"port": 22,
 			}},
 		},
@@ -176,16 +175,16 @@ func TestShouldReturnErrorOnDuplicateSSHConfigWhenMerging(t *testing.T) {
 	t.Parallel()
 
 	// given
-	config := HostsWithConfigs{
+	config := RawConfigContext{
 		RawConfigs: RawConfigs{
-			"service-a": []map[string]interface{}{{
+			"service-a": RawConfig{{
 				"identity_file": "a_id_rsa.pub",
 			}},
 		},
 	}
-	config2 := HostsWithConfigs{
+	config2 := RawConfigContext{
 		RawConfigs: RawConfigs{
-			"service-a": []map[string]interface{}{{
+			"service-a": RawConfig{{
 				"port": 22,
 			}},
 		},
@@ -203,7 +202,7 @@ func TestShouldReturnErrorOnDuplicateAlias(t *testing.T) {
 	t.Parallel()
 
 	// given
-	config := HostsWithConfigs{
+	config := RawConfigContext{
 		Hosts: []Host{{
 			Name: "service-a",
 		}, {
@@ -212,7 +211,7 @@ func TestShouldReturnErrorOnDuplicateAlias(t *testing.T) {
 	}
 
 	// when
-	results, err := config.ToHostConfigInputs()
+	results, err := config.ToExpandingHostConfigs()
 
 	// then
 	assert.Nil(t, results)
@@ -223,7 +222,7 @@ func TestShouldSortHostConfigAndSanitizeKeywords(t *testing.T) {
 	t.Parallel()
 
 	// given
-	config := HostConfig{
+	config := Config{
 		"b": "something",
 		"c": "abc",
 		"d": 0,
@@ -231,10 +230,10 @@ func TestShouldSortHostConfigAndSanitizeKeywords(t *testing.T) {
 	}
 
 	// when
-	entries := config.toSortedHostConfigEntries()
+	entries := config.toSortedProperties()
 
 	// then
-	assert.Equal(t, compiler.HostConfigEntries{
+	assert.Equal(t, compiler.ConfigProperties{
 		{"A", 123},
 		{"B", "something"},
 		{"C", "abc"},

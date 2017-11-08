@@ -13,7 +13,7 @@ type Compiler struct {
 func NewCompiler() *Compiler {
 	return &Compiler{
 		expander:     NewExpander(),
-		groupsRegexp: regexp.MustCompile("%(\\d+)"),
+		groupsRegexp: regexp.MustCompile("{#(\\d+)}"),
 	}
 }
 

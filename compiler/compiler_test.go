@@ -13,7 +13,7 @@ func TestCompile(t *testing.T) {
 	sshConfig := HostConfigEntries{{"identity_file", "~/.ssh/id_rsa"}}
 	input := HostConfigInput{
 		HostnamePattern: "x-master[1..2].myproj-prod.dc1.net",
-		AliasTemplate:   "host%1-dc1",
+		AliasTemplate:   "host{#1}-dc1",
 		HostConfig:      sshConfig,
 	}
 
@@ -39,7 +39,7 @@ func TestShouldReplaceAllGroupMatchOccurrences(t *testing.T) {
 	// given
 	input := HostConfigInput{
 		HostnamePattern: "x-[master1].myproj-prod.dc1.net",
-		AliasTemplate:   "%1-%1-%1",
+		AliasTemplate:   "{#1}-{#1}-{#1}",
 	}
 
 	// when
@@ -57,7 +57,7 @@ func TestShouldExpandHostnameWithProvidedRange(t *testing.T) {
 	// given
 	input := HostConfigInput{
 		HostnamePattern: "x-master[4..6].myproj-prod.dc1.net",
-		AliasTemplate:   "m%1",
+		AliasTemplate:   "m{#1}",
 	}
 
 	// when

@@ -24,12 +24,12 @@ func TestShouldDecodeConfig(t *testing.T) {
 		Hosts: []Host{{
 			Name:           "service-a",
 			Hostname:       "service-a[1..5].example.com",
-			Alias:          "a%1",
+			Alias:          "a{#1}",
 			RawConfigOrRef: "service-a",
 		}, {
 			Name:     "service-b",
 			Hostname: "service-b[1..2].example.com",
-			Alias:    "b%1",
+			Alias:    "b{#1}",
 			RawConfigOrRef: []map[string]interface{}{{
 				"identity_file": "b_id_rsa.pem",
 			}, {

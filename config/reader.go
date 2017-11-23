@@ -1,41 +1,68 @@
 package config
 
+import (
+	"io/ioutil"
+
+	"github.com/dankraw/ssh-aliases/compiler"
+)
+
+// Reader is able to read directories and files and return inputs for ssh-aliases compiler
 type Reader struct {
-	decoder *Decoder
+	decoder *decoder
 	scanner *Scanner
 }
 
+// NewReader returns new instance of Reader
 func NewReader() *Reader {
 	return &Reader{
-		decoder: NewDecoder(),
+		decoder: newDecoder(),
 		scanner: NewScanner(),
 	}
 }
 
-func (e *Reader) ReadConfigs(dir string) (RawConfigContext, error) {
+// ReadConfigs processes the input directory and returns inputs for ssh-aliases compiler
+func (e *Reader) ReadConfigs(dir string) ([]compiler.ExpandingHostConfig, error) {
 	files, err := e.scanner.ScanDirectory(dir)
 	if err != nil {
-		return RawConfigContext{}, err
+		return nil, err
 	}
-	config := RawConfigContext{}
+	var parsed []rawConfigContext
 	for _, f := range files {
-		c, err := e.ReadConfig(f)
+		c, err := e.decodeFile(f)
 		if err != nil {
-			return RawConfigContext{}, err
+			return nil, err
 		}
-		config.Merge(c)
+		parsed = append(parsed, c)
 	}
-	return config, nil
+	merged, err := mergeRawConfigContexts(parsed...)
+	if err != nil {
+		return nil, err
+
+	}
+	configs, err := merged.toExpandingHostConfigs()
+	if err != nil {
+		return nil, err
+	}
+	return configs, nil
 }
 
-func (e *Reader) ReadConfig(file string) (RawConfigContext, error) {
-	data, err := e.scanner.ReadFile(file)
+// ReadConfig processes the input file and returns inputs for ssh-aliases compiler
+func (e *Reader) ReadConfig(file string) ([]compiler.ExpandingHostConfig, error) {
+	config, err := e.decodeFile(file)
 	if err != nil {
-		return RawConfigContext{}, err
+		return nil, err
 	}
-	c, err := e.decoder.Decode(data)
+	return config.toExpandingHostConfigs()
+}
+
+func (e *Reader) decodeFile(file string) (rawConfigContext, error) {
+	data, err := ioutil.ReadFile(file)
 	if err != nil {
-		return RawConfigContext{}, err
+		return rawConfigContext{}, err
+	}
+	c, err := e.decoder.decode(data)
+	if err != nil {
+		return rawConfigContext{}, err
 	}
 	return c, nil
 }

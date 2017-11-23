@@ -12,21 +12,21 @@ import (
 	"github.com/dankraw/ssh-aliases/config"
 )
 
-type CompileSaveCommand struct {
+type compileSaveCommand struct {
 	file    string
-	confirm *Confirm
+	confirm *confirm
 }
 
-func NewCompileSaveCommand(file string) *CompileSaveCommand {
-	return &CompileSaveCommand{
+func newCompileSaveCommand(file string) *compileSaveCommand {
+	return &compileSaveCommand{
 		file:    file,
-		confirm: NewConfirm(os.Stdin),
+		confirm: newConfirm(os.Stdin),
 	}
 }
 
-func (c *CompileSaveCommand) Execute(dir string, force bool) error {
+func (c *compileSaveCommand) execute(dir string, force bool) error {
 	if !force {
-		confirmed, err := c.confirm.RequireConfirmationIfFileExists(c.file)
+		confirmed, err := c.confirm.requireConfirmationIfFileExists(c.file)
 		if err != nil {
 			return err
 		}
@@ -36,14 +36,14 @@ func (c *CompileSaveCommand) Execute(dir string, force bool) error {
 		}
 	}
 	buffer := new(bytes.Buffer)
-	err := NewCompileCommand(buffer).Execute(dir)
+	err := newCompileCommand(buffer).execute(dir)
 	if err != nil {
 		return err
 	}
 	return ioutil.WriteFile(c.file, buffer.Bytes(), 0600)
 }
 
-type CompileCommand struct {
+type compileCommand struct {
 	indentation  int
 	writer       io.Writer
 	configReader *config.Reader
@@ -51,8 +51,8 @@ type CompileCommand struct {
 	validator    *compiler.Validator
 }
 
-func NewCompileCommand(writer io.Writer) *CompileCommand {
-	return &CompileCommand{
+func newCompileCommand(writer io.Writer) *compileCommand {
+	return &compileCommand{
 		indentation:  4,
 		writer:       writer,
 		configReader: config.NewReader(),
@@ -61,16 +61,12 @@ func NewCompileCommand(writer io.Writer) *CompileCommand {
 	}
 }
 
-func (c *CompileCommand) Execute(dir string) error {
-	config, err := c.configReader.ReadConfigs(dir)
+func (c *compileCommand) execute(dir string) error {
+	inputs, err := c.configReader.ReadConfigs(dir)
 	if err != nil {
 		return err
 	}
-	inputs, err := config.ToExpandingHostConfigs()
-	if err != nil {
-		return err
-	}
-	allResults := []compiler.HostEntity{}
+	var allResults []compiler.HostEntity
 	for _, input := range inputs {
 		results, err := c.compiler.Compile(input)
 		if err != nil {
@@ -88,7 +84,7 @@ func (c *CompileCommand) Execute(dir string) error {
 	return nil
 }
 
-func (c *CompileCommand) printHostConfig(config compiler.HostEntity) {
+func (c *compileCommand) printHostConfig(config compiler.HostEntity) {
 	fmt.Fprintf(c.writer, "Host %v\n", config.Host)
 	c.printHostConfigProperty("HostName", config.HostName)
 
@@ -98,6 +94,6 @@ func (c *CompileCommand) printHostConfig(config compiler.HostEntity) {
 	fmt.Fprintln(c.writer)
 }
 
-func (c *CompileCommand) printHostConfigProperty(keyword string, value interface{}) {
+func (c *compileCommand) printHostConfigProperty(keyword string, value interface{}) {
 	fmt.Fprintf(c.writer, "     %s %v\n", keyword, value)
 }

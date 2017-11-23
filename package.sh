@@ -27,7 +27,7 @@ for OS in ${OS_LIST}; do
     for ARCH in ${ARCH_LIST}; do
         echo "Making binary for ${OS}/${ARCH}"
 
-        env GOOS=${OS} GOARCH=${ARCH} go build -o ${OUT_BINARY} -ldflags "-s -w -X main.VERSION=${VERSION}"
+        env CGO_ENABLED=0 GOOS=${OS} GOARCH=${ARCH} go build -a -o ${OUT_BINARY} -ldflags "-s -w -X main.Version=${VERSION} -extldflags '-static'"
         if [ ${OS} == "darwin" ]; then
             zip -rj "${DIST}/ssh-aliases_${VERSION}_${OS}_${ARCH}.zip" ${OUT_DIR}
         else

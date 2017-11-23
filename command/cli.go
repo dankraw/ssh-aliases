@@ -1,30 +1,40 @@
 package command
 
 import (
-	"os"
 	"os/user"
 
 	"path/filepath"
+
+	"io"
 
 	"github.com/urfave/cli"
 )
 
 const sshAliasesDir = ".ssh_aliases"
 
+// CLI stands for Command Line Interface
+// CLI interprets user input and executes commands
 type CLI struct {
-	version string
+	app *cli.App
 }
 
-func NewCLI(version string) *CLI {
-	return &CLI{
-		version: version,
-	}
-}
-
-func (c *CLI) ConfigureCLI() error {
-	homeDir, err := c.homeDir()
+// NewCLI creates new CLI instance
+// provided version will be printed with --version
+// CLI will write output to provided writer
+func NewCLI(version string, writer io.Writer) (*CLI, error) {
+	app, err := configureCLI(version, writer)
 	if err != nil {
-		return err
+		return nil, err
+	}
+	return &CLI{
+		app: app,
+	}, nil
+}
+
+func configureCLI(version string, writer io.Writer) (*cli.App, error) {
+	homeDir, err := homeDir()
+	if err != nil {
+		return nil, err
 	}
 	var scanDir string
 	var save bool
@@ -32,7 +42,7 @@ func (c *CLI) ConfigureCLI() error {
 	var file string
 
 	app := cli.NewApp()
-	app.Version = c.version
+	app.Version = version
 	app.Name = "ssh-aliases"
 	app.Usage = "template driven ssh config generation"
 	app.Flags = []cli.Flag{
@@ -48,7 +58,7 @@ func (c *CLI) ConfigureCLI() error {
 		Aliases: []string{"l"},
 		Usage:   "Prints the list of host definitions",
 		Action: func(ctx *cli.Context) error {
-			err := NewListCommand(os.Stdout).Execute(scanDir)
+			err := newListCommand(writer).execute(scanDir)
 			if err != nil {
 				return cli.NewExitError(err.Error(), 1)
 			}
@@ -79,9 +89,9 @@ func (c *CLI) ConfigureCLI() error {
 		Action: func(ctx *cli.Context) error {
 			var err error
 			if save {
-				err = NewCompileSaveCommand(file).Execute(scanDir, force)
+				err = newCompileSaveCommand(file).execute(scanDir, force)
 			} else {
-				err = NewCompileCommand(os.Stdout).Execute(scanDir)
+				err = newCompileCommand(writer).execute(scanDir)
 			}
 			if err != nil {
 				return cli.NewExitError(err.Error(), 1)
@@ -89,14 +99,18 @@ func (c *CLI) ConfigureCLI() error {
 			return nil
 		},
 	}}
-	app.Run(os.Args)
-	return nil
+	return app, nil
 }
 
-func (c *CLI) homeDir() (string, error) {
+func homeDir() (string, error) {
 	usr, err := user.Current()
 	if err != nil {
 		return "", err
 	}
 	return usr.HomeDir, nil
+}
+
+// ApplyArgs runs the CLI against provided args
+func (c *CLI) ApplyArgs(args []string) error {
+	return c.app.Run(args)
 }

@@ -19,7 +19,13 @@ func TestCompileCommandExecute(t *testing.T) {
 	buffer := new(bytes.Buffer)
 
 	// when
-	err := command.NewCompileCommand(buffer).Execute(dir)
+	cli, err := command.NewCLI("test-version", buffer)
+
+	// then
+	assert.NoError(t, err)
+
+	// and
+	err = cli.ApplyArgs([]string{"ssh-aliases", "--scan", dir, "compile"})
 
 	// then
 	assert.NoError(t, err)
@@ -34,7 +40,13 @@ func TestListCommandExecute(t *testing.T) {
 	buffer := new(bytes.Buffer)
 
 	// when
-	err := command.NewListCommand(buffer).Execute(dir)
+	cli, err := command.NewCLI("test-version", buffer)
+
+	// then
+	assert.NoError(t, err)
+
+	// and
+	err = cli.ApplyArgs([]string{"ssh-aliases", "--scan", dir, "list"})
 
 	// then
 	assert.NoError(t, err)

@@ -20,7 +20,7 @@ func TestListCommandExecute(t *testing.T) {
 	buffer := new(bytes.Buffer)
 
 	// when
-	err := NewListCommand(buffer).Execute(fixtureDir)
+	err := newListCommand(buffer).execute(fixtureDir)
 
 	// then
 	assert.NoError(t, err)

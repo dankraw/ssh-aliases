@@ -1,7 +1,6 @@
 package compiler
 
 import (
-	"errors"
 	"fmt"
 	"regexp"
 	"sort"
@@ -9,47 +8,47 @@ import (
 	"strings"
 )
 
-type Expander struct {
+type expander struct {
 	rangeRegexp     *regexp.Regexp
 	variationRegexp *regexp.Regexp
 	hostnameRegexp  *regexp.Regexp
 }
 
-func NewExpander() *Expander {
-	return &Expander{
+func newExpander() *expander {
+	return &expander{
 		rangeRegexp:     regexp.MustCompile("\\[(\\d+)\\.\\.(\\d+)\\]"),
 		variationRegexp: regexp.MustCompile("\\[([a-zA-Z0-9-|]+(?:\\.[a-zA-Z0-9-|]+)*)+\\]"),
 		hostnameRegexp:  regexp.MustCompile("^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9])(\\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]))*$"),
 	}
 }
 
-type ExpandingRange struct {
+type expandingRange struct {
 	beginIdx int
 	endIdx   int
 	values   []string
 }
 
-type ExpandedHostname struct {
+type expandedHostname struct {
 	Hostname     string
 	Replacements []string
 }
 
-type ByIndex []ExpandingRange
+type byIndex []expandingRange
 
-func (s ByIndex) Len() int {
+func (s byIndex) Len() int {
 	return len(s)
 }
 
-func (s ByIndex) Less(i, j int) bool {
+func (s byIndex) Less(i, j int) bool {
 	return s[i].beginIdx < s[j].beginIdx
 }
 
-func (s ByIndex) Swap(i, j int) {
+func (s byIndex) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
-func (e *Expander) expand(host string) ([]ExpandedHostname, error) {
-	var ranges []ExpandingRange
+func (e *expander) expand(host string) ([]expandedHostname, error) {
+	var ranges []expandingRange
 	n := 1
 	for _, r := range e.rangeRegexp.FindAllStringSubmatchIndex(host, -1) {
 		expRange, err := e.expandingRange(host, r)
@@ -61,7 +60,7 @@ func (e *Expander) expand(host string) ([]ExpandedHostname, error) {
 	}
 	for _, v := range e.variationRegexp.FindAllStringSubmatchIndex(host, -1) {
 		split := strings.Split(host[v[2]:v[3]], "|")
-		ranges = append(ranges, ExpandingRange{
+		ranges = append(ranges, expandingRange{
 			beginIdx: v[0],
 			endIdx:   v[1],
 			values:   split,
@@ -70,9 +69,9 @@ func (e *Expander) expand(host string) ([]ExpandedHostname, error) {
 	}
 	if len(ranges) == 0 {
 		if !e.hostnameRegexp.MatchString(host) {
-			return nil, errors.New(fmt.Sprintf("Produced string `%v` is not a valid Hostname", host))
+			return nil, fmt.Errorf("produced string `%v` is not a valid Hostname", host)
 		}
-		return []ExpandedHostname{{Hostname: host}}, nil
+		return []expandedHostname{{Hostname: host}}, nil
 	}
 	hostnames, err := e.expandedHostnames(n, host, ranges)
 	if err != nil {
@@ -81,32 +80,32 @@ func (e *Expander) expand(host string) ([]ExpandedHostname, error) {
 	return hostnames, nil
 }
 
-func (e *Expander) expandingRange(host string, rangeGroup []int) (ExpandingRange, error) {
+func (e *expander) expandingRange(host string, rangeGroup []int) (expandingRange, error) {
 	begin, err := strconv.Atoi(host[rangeGroup[2]:rangeGroup[3]])
 	if err != nil {
-		return ExpandingRange{}, err
+		return expandingRange{}, err
 	}
 	end, err := strconv.Atoi(host[rangeGroup[4]:rangeGroup[5]])
 	if err != nil {
-		return ExpandingRange{}, err
+		return expandingRange{}, err
 	}
 	if begin >= end {
-		return ExpandingRange{}, errors.New(fmt.Sprintf("Invalid range: %v is not smaller than %v", begin, end))
+		return expandingRange{}, fmt.Errorf("invalid range: %v is not smaller than %v", begin, end)
 	}
 	values := []string{}
 	for i := begin; i <= end; i++ {
 		values = append(values, strconv.Itoa(i))
 	}
-	return ExpandingRange{
+	return expandingRange{
 		beginIdx: rangeGroup[0],
 		endIdx:   rangeGroup[1],
 		values:   values,
 	}, nil
 }
 
-func (e *Expander) expandedHostnames(size int, host string, ranges []ExpandingRange) ([]ExpandedHostname, error) {
-	var hostnames []ExpandedHostname
-	sort.Sort(ByIndex(ranges))
+func (e *expander) expandedHostnames(size int, host string, ranges []expandingRange) ([]expandedHostname, error) {
+	var hostnames []expandedHostname
+	sort.Sort(byIndex(ranges))
 	for i := 0; i < size; i++ {
 		j := 1
 		var hostnameReplacements []string
@@ -125,9 +124,9 @@ func (e *Expander) expandedHostnames(size int, host string, ranges []ExpandingRa
 			hostnameReplacements = append(hostnameReplacements, value)
 		}
 		if !e.hostnameRegexp.MatchString(produced) {
-			return nil, errors.New(fmt.Sprintf("Produced string `%v` is not a valid Hostname", produced))
+			return nil, fmt.Errorf("produced string `%v` is not a valid Hostname", produced)
 		}
-		hostnames = append(hostnames, ExpandedHostname{
+		hostnames = append(hostnames, expandedHostname{
 			Hostname:     produced,
 			Replacements: hostnameReplacements,
 		})

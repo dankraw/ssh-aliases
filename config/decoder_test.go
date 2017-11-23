@@ -17,11 +17,11 @@ func TestShouldDecodeConfig(t *testing.T) {
 	data, _ := ioutil.ReadFile(filepath.Join(fixtureDir, "example.hcl"))
 
 	// when
-	config, _ := NewDecoder().Decode(data)
+	config, _ := newDecoder().decode(data)
 
 	// then
-	assert.Equal(t, RawConfigContext{
-		Hosts: []Host{{
+	assert.Equal(t, rawConfigContext{
+		Hosts: []host{{
 			Name:           "service-a",
 			Hostname:       "service-a[1..5].example.com",
 			Alias:          "a{#1}",
@@ -35,8 +35,8 @@ func TestShouldDecodeConfig(t *testing.T) {
 			}, {
 				"port": 22,
 			}},
-		}}, RawConfigs: RawConfigs{
-			"service-a": RawConfig{{
+		}}, RawConfigs: rawConfigs{
+			"service-a": rawConfig{{
 				"identity_file": "a_id_rsa.pem",
 				"port":          22,
 			}},

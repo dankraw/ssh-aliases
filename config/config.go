@@ -1,7 +1,6 @@
 package config
 
 import (
-	"errors"
 	"fmt"
 
 	"sort"
@@ -9,37 +8,37 @@ import (
 	"github.com/dankraw/ssh-aliases/compiler"
 )
 
-type RawConfigContext struct {
-	Hosts      []Host     `hcl:"host"`
-	RawConfigs RawConfigs `hcl:"config"`
+type rawConfigContext struct {
+	Hosts      []host     `hcl:"host"`
+	RawConfigs rawConfigs `hcl:"config"`
 }
 
-type Host struct {
+type host struct {
 	Name           string         `hcl:",key"`
 	Hostname       string         `hcl:"hostname"`
 	Alias          string         `hcl:"alias"`
-	RawConfigOrRef RawConfigOrRef `hcl:"config"`
+	RawConfigOrRef rawConfigOrRef `hcl:"config"`
 }
 
-type RawConfigOrRef interface{}
+type rawConfigOrRef interface{}
 
-type RawConfigs map[string]RawConfig
+type rawConfigs map[string]rawConfig
 
-type RawConfig []Config
+type rawConfig []configProps
 
-type Config map[string]interface{}
+type configProps map[string]interface{}
 
-func (c *RawConfigContext) toConfigPropertiesMap() (configPropertiesMap, error) {
+func (c *rawConfigContext) toConfigPropertiesMap() (configPropertiesMap, error) {
 	propsMap := configPropertiesMap{}
 	for name, r := range c.RawConfigs {
 		if _, exists := propsMap[name]; exists {
-			return configPropertiesMap{}, errors.New(fmt.Sprintf("Duplicate config with name %v", name))
+			return configPropertiesMap{}, fmt.Errorf("duplicate config with name %v", name)
 		}
-		h := Config{}
+		h := configProps{}
 		for _, x := range r {
 			for k, v := range x {
 				if _, ok := h[k]; ok {
-					return configPropertiesMap{}, errors.New(fmt.Sprintf("Duplicate config entry `%v` in host `%v`", k, name))
+					return configPropertiesMap{}, fmt.Errorf("duplicate config entry `%v` in host `%v`", k, name)
 				}
 				h[k] = v
 			}
@@ -51,28 +50,28 @@ func (c *RawConfigContext) toConfigPropertiesMap() (configPropertiesMap, error) 
 
 type configPropertiesMap map[string]compiler.ConfigProperties
 
-var sanitizer = NewKeywordSanitizer()
+var sanitizer = newKeywordSanitizer()
 
-func (c *Config) toSortedProperties() compiler.ConfigProperties {
+func (c *configProps) toSortedProperties() compiler.ConfigProperties {
 	var entries []compiler.ConfigProperty
 	for k, v := range *c {
-		entries = append(entries, compiler.ConfigProperty{sanitizer.Sanitize(k), v})
+		entries = append(entries, compiler.ConfigProperty{Key: sanitizer.sanitize(k), Value: v})
 	}
 	sort.Sort(compiler.ByConfigPropertyKey(entries))
 	return entries
 }
 
-func (c *RawConfigContext) ToExpandingHostConfigs() ([]compiler.ExpandingHostConfig, error) {
+func (c *rawConfigContext) toExpandingHostConfigs() ([]compiler.ExpandingHostConfig, error) {
 	configsMap, err := c.toConfigPropertiesMap()
 	if err != nil {
 		return nil, err
 	}
 	var inputs []compiler.ExpandingHostConfig
 
-	aliases := map[string]Host{}
+	aliases := map[string]host{}
 	for _, a := range c.Hosts {
 		if _, ok := aliases[a.Name]; ok {
-			return nil, errors.New(fmt.Sprintf("Duplicate host `%v`", a.Name))
+			return nil, fmt.Errorf("duplicate host `%v`", a.Name)
 		}
 		aliases[a.Name] = a
 
@@ -85,38 +84,41 @@ func (c *RawConfigContext) ToExpandingHostConfigs() ([]compiler.ExpandingHostCon
 			if named, ok := configsMap[configName]; ok {
 				input.Config = named
 			} else {
-				return nil, errors.New(fmt.Sprintf("No config `%v` found (used by host `%v`)",
-					configName, a.Name))
+				return nil, fmt.Errorf("no config `%v` found (used by host `%v`)",
+					configName, a.Name)
 			}
 		} else if m, ok := a.RawConfigOrRef.([]map[string]interface{}); ok {
-			h := Config{}
+			h := configProps{}
 			for _, x := range m {
 				for k, v := range x {
 					if _, ok := h[k]; ok {
-						return nil, errors.New(fmt.Sprintf("Duplicate config property `%v` for host `%v`", k, a.Name))
+						return nil, fmt.Errorf("duplicate config property `%v` for host `%v`", k, a.Name)
 					}
 					h[k] = v
 				}
 			}
 			input.Config = h.toSortedProperties()
 		} else {
-			return nil, errors.New(fmt.Sprintf("Invalid config definition for host `%v`", a.Name))
+			return nil, fmt.Errorf("invalid config definition for host `%v`", a.Name)
 		}
 		inputs = append(inputs, input)
 	}
 	return inputs, nil
 }
 
-func (c *RawConfigContext) Merge(config RawConfigContext) error {
-	c.Hosts = append(c.Hosts, config.Hosts...)
-	if c.RawConfigs == nil {
-		c.RawConfigs = RawConfigs{}
+func mergeRawConfigContexts(contexts ...rawConfigContext) (rawConfigContext, error) {
+	m := rawConfigContext{
+		Hosts:      []host{},
+		RawConfigs: rawConfigs{},
 	}
-	for n, r := range config.RawConfigs {
-		if _, ok := c.RawConfigs[n]; ok {
-			return errors.New(fmt.Sprintf("Duplicate config `%s`", n))
+	for _, c := range contexts {
+		m.Hosts = append(m.Hosts, c.Hosts...)
+		for n, r := range c.RawConfigs {
+			if _, ok := m.RawConfigs[n]; ok {
+				return rawConfigContext{}, fmt.Errorf("duplicate config `%s`", n)
+			}
+			m.RawConfigs[n] = r
 		}
-		c.RawConfigs[n] = r
 	}
-	return nil
+	return m, nil
 }

@@ -1,4 +1,7 @@
-# ssh-aliases [![Build Status](https://travis-ci.org/dankraw/ssh-aliases.svg?branch=master)](https://travis-ci.org/dankraw/ssh-aliases)
+# ssh-aliases 
+[![Build Status](https://travis-ci.org/dankraw/ssh-aliases.svg?branch=master)](https://travis-ci.org/dankraw/ssh-aliases) 
+[![Go Report Card](https://goreportcard.com/badge/github.com/dankraw/ssh-aliases)](https://goreportcard.com/report/github.com/dankraw/ssh-aliases)
+
 `ssh-aliases` is a command line tool that brings ease to living with `~/.ssh/config`.
 
 In short, `ssh-aliases`:
@@ -7,7 +10,7 @@ In short, `ssh-aliases`:
 like `instance[1..3].example.com` or `[master|slave].example.com`
 * creates aliases for hosts by compiling [templates](#alias-templates) (no need to write regexps)
 * allows multiple hosts reuse the same `ssh` configuration
-* is a single, no-dependency binary file
+* is a single binary file
 
 ## Table of contents
 
@@ -44,7 +47,9 @@ There is a `Makefile`, so you can use it as well:
 
 ``` console
 make test # run tests
-make      # run tests & build binary to ./bin directory
+make fmt  # format code
+make lint # run linters
+make      # build binary to ./target/ssh-aliases
 ```
 
 ## Configuration files
@@ -60,8 +65,7 @@ Looking at examples below will be enough to become familiar with HCL format.
 ### Scanned directories
 
 As you probably know, `ssh` command allows you to have just a single configuration file (`~/.ssh/config`). 
-In contrast to this, `ssh-aliases` allows you (and it's highly recommended!) to divide configuration 
-into multiple files depending on your needs.
+In contrast to this, `ssh-aliases` allows you to divide configuration into multiple files depending on your needs.
 When running `ssh-aliases` you point it to a directory (by default it's `~/.ssh_aliases`) 
 containing any number of HCL config files. The directory will be scanned for files with `.hcl` extension.
 Keep in mind it does not scan recursively - child directories won't be considered.
@@ -70,20 +74,19 @@ Keep in mind it does not scan recursively - child directories won't be considere
 
 A single config file may contain any number of components defined in it. 
 Currently there are two types of components:
-* `host` definitions
-* `config` properties
+* [Host definitions](#host-definitions)
+* [Config properties](#config-properties)
 
 #### Host definitions
 
-A `host` definition consists of a `host` keyword and it's globally unique (among all scanned files) name.
+A host definition consists of a `host` keyword and it's globally unique (among all scanned files) name.
 Each `host` should contain following attributes:
 * `hostname` - is a target hostname, possibly containing [expanding expressions](#expanding-hosts)
-* `alias` - is an alias for the `hostname`, or a template when `host` is going to be expanded
-* `config` - an embedded [`config` properties](#config-properties) definition, or a name (a `string`) that points 
+* `alias` - is an alias template for the destination hostname
+* `config` - an embedded [config properties](#config-properties) definition, or a name (a `string`) that points 
 to existing properties definition in the same or any other configuration file
 
-
-An example `host` definition looks like:
+An example host definition looks like:
 
 ``` hcl
 host "my-service" {
@@ -110,19 +113,19 @@ host "my-service" {
 
 #### Config properties
 
-A `config` properties definition consists of a `config` keyword and it's globally unique (among all scanned files) name.
-It's body is a list of properties that map to `ssh` config keywords and their values. 
+A config properties definition consists of a `config` keyword and it's globally unique (among all scanned files) name.
+It's body is a list of properties that map to `ssh_config` keywords and their values. 
 A complete list of ssh config keywords can be seen [here](https://linux.die.net/man/5/ssh_config) 
 or listed via `man ssh_config` in your terminal.
 
 Each property may contain an underscore (`_`) in its keyword for clarity, 
 all underscores are removed during config compilation, first character and all letters that follow underscores are capitalized - 
-this makes generated file easier to read. For example, `identity_file` will become `IdentityFile` in destination config file.
-By design `ssh` config keywords are case insensitive, and their values are case sensitive.
+this makes generated file easier to read. For example, `identity_file` will become `IdentityFile` in the destination config file.
+By design `ssh_config` keywords are case insensitive, and their values are case sensitive.
 
 Provided properties are not validated by `ssh-aliases`, so it should work even if you have a custom built `ssh` command.
 
-An example `config` may look like:
+An example config properties definition may look like:
 
 ``` hcl
 config "some-config" {
@@ -136,8 +139,8 @@ config "some-config" {
 ### Expanding hosts
 
 The most important feature of `ssh-aliases` is *hosts expansion*.
-It's a mechanism of generating multiple `host` entries for the destination config out of a single [`host` definition](#host-definitions).
-It is done by using *range expressions* in hostnames and compiling `host` aliases from templates.
+It's a mechanism of generating multiple `Host ...` entries in the destination `ssh_config` out of a single [host definition](#host-definitions).
+It is done by using *range expressions* in hostnames and compiling host aliases from templates.
 
 #### Expanding expressions
 
@@ -164,7 +167,7 @@ server.test.example.com
 server.prod.example.com
 ```
 
-Of course ranges and sets can be used altogether multiple times each. 
+Of course ranges and sets can be used together multiple times each. 
 A final result will be a [cartesian product](https://en.wikipedia.org/wiki/Cartesian_product) of all expanding expressions provided.
 For example, a hostname `server[1..2].[dev|test].example.com` would be expanded to:
 
@@ -177,7 +180,7 @@ server2.test.example.com
 
 #### Alias templates
 
-Each generated `host` entry needs to have an alias that is provided in [`host` definition](#host-definitions). 
+Each generated `Host ...` entry needs to have an alias that is provided in [host definition](#host-definitions). 
 If hostnames are [expanded](#expanding-expressions) it is required to provide **placeholders** 
 for all expanding expressions used. Otherwise `ssh-aliases` would generate 
 the same alias for multiple hostnames, and that simply makes no sense.

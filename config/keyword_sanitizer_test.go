@@ -10,7 +10,7 @@ func TestShouldSanitizeKeywords(t *testing.T) {
 	t.Parallel()
 
 	// given
-	compiler := NewKeywordSanitizer()
+	compiler := newKeywordSanitizer()
 	entries := []struct {
 		input    string
 		expected string
@@ -24,7 +24,7 @@ func TestShouldSanitizeKeywords(t *testing.T) {
 
 	for _, e := range entries {
 		// when
-		actual := compiler.Sanitize(e.input)
+		actual := compiler.sanitize(e.input)
 
 		// then
 		assert.Equal(t, actual, e.expected)

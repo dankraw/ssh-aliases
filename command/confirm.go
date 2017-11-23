@@ -9,17 +9,17 @@ import (
 	"strings"
 )
 
-type Confirm struct {
+type confirm struct {
 	reader io.Reader
 }
 
-func NewConfirm(reader io.Reader) *Confirm {
-	return &Confirm{
+func newConfirm(reader io.Reader) *confirm {
+	return &confirm{
 		reader: reader,
 	}
 }
 
-func (c *Confirm) RequireConfirmationIfFileExists(path string) (bool, error) {
+func (c *confirm) requireConfirmationIfFileExists(path string) (bool, error) {
 	exists, err := c.fileExists(path)
 	if err != nil {
 		return false, err
@@ -29,7 +29,7 @@ func (c *Confirm) RequireConfirmationIfFileExists(path string) (bool, error) {
 	}
 	return c.confirmation(path)
 }
-func (c *Confirm) confirmation(path string) (bool, error) {
+func (c *confirm) confirmation(path string) (bool, error) {
 	r := bufio.NewReader(c.reader)
 	fmt.Printf("File `%s` already exists. Overwrite? (Y/n)\n", path)
 	response, err := r.ReadString('\n')
@@ -39,9 +39,9 @@ func (c *Confirm) confirmation(path string) (bool, error) {
 	return strings.TrimSpace(response) == "Y", nil
 }
 
-func (c *Confirm) fileExists(path string) (bool, error) {
+func (c *confirm) fileExists(path string) (bool, error) {
 	if strings.TrimSpace(path) == "" {
-		return false, errors.New("Provided path is empty")
+		return false, errors.New("provided path is empty")
 	}
 	info, err := os.Stat(path)
 	if err != nil {
@@ -51,7 +51,7 @@ func (c *Confirm) fileExists(path string) (bool, error) {
 		return false, err
 	}
 	if info.IsDir() {
-		return true, errors.New(fmt.Sprintf("Path `%s` is a directory", path))
+		return true, fmt.Errorf("path `%s` is a directory", path)
 	}
 	return true, nil
 }

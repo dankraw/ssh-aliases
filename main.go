@@ -4,15 +4,21 @@ import (
 	"fmt"
 	"os"
 
-	. "github.com/dankraw/ssh-aliases/command"
+	"github.com/dankraw/ssh-aliases/command"
 )
 
-var VERSION string
+// Version contains the binary version when built with -ldflags "-X main.Version=<some version>"
+var Version string
 
 func main() {
-	err := NewCLI(VERSION).ConfigureCLI()
+	cli, err := command.NewCLI(Version, os.Stdout)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "An error occurred:\n%v\n", err.Error())
+		fmt.Fprintf(os.Stderr, "An error occurred while configuring CLI:\n%v\n", err.Error())
+		os.Exit(1)
+	}
+	err = cli.ApplyArgs(os.Args)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "An error occurred during command execution:\n%v\n", err.Error())
 		os.Exit(1)
 	}
 }

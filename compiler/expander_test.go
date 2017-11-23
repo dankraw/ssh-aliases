@@ -12,11 +12,11 @@ func TestShouldNotExpandForNoOperators(t *testing.T) {
 	hostname := "x-master1.myproj-prod.dc1.net"
 
 	// when
-	hostnames, err := NewExpander().expand(hostname)
+	hostnames, err := newExpander().expand(hostname)
 
 	// then
 	assert.NoError(t, err)
-	assert.Equal(t, []ExpandedHostname{{
+	assert.Equal(t, []expandedHostname{{
 		Hostname: "x-master1.myproj-prod.dc1.net",
 	}}, hostnames)
 }
@@ -28,11 +28,11 @@ func TestShouldExpandHostnameWithRange(t *testing.T) {
 	hostname := "x-master[1..3].myproj-prod.dc1.net"
 
 	// when
-	hostnames, err := NewExpander().expand(hostname)
+	hostnames, err := newExpander().expand(hostname)
 
 	// then
 	assert.NoError(t, err)
-	assert.Equal(t, []ExpandedHostname{{
+	assert.Equal(t, []expandedHostname{{
 		Hostname:     "x-master1.myproj-prod.dc1.net",
 		Replacements: []string{"1"},
 	}, {
@@ -51,11 +51,11 @@ func TestShouldReturnErrorOnInvalidRange(t *testing.T) {
 	hostname := "x-master[120..13].myproj-prod.dc1.net"
 
 	// when
-	_, err := NewExpander().expand(hostname)
+	_, err := newExpander().expand(hostname)
 
 	// then
 	assert.Error(t, err)
-	assert.Equal(t, "Invalid range: 120 is not smaller than 13", err.Error())
+	assert.Equal(t, "invalid range: 120 is not smaller than 13", err.Error())
 }
 
 func TestShouldReturnErrorWhenProducedStringIsNotAValidHostname(t *testing.T) {
@@ -65,11 +65,11 @@ func TestShouldReturnErrorWhenProducedStringIsNotAValidHostname(t *testing.T) {
 	hostname := "--ddd--[1..2]..."
 
 	// when
-	_, err := NewExpander().expand(hostname)
+	_, err := newExpander().expand(hostname)
 
 	// then
 	assert.Error(t, err)
-	assert.Equal(t, "Produced string `--ddd--1...` is not a valid Hostname", err.Error())
+	assert.Equal(t, "produced string `--ddd--1...` is not a valid Hostname", err.Error())
 }
 
 func TestShouldReturnErrorWhenNoRangeWasFoundAndProducedStringIsNotAValidHostname(t *testing.T) {
@@ -79,11 +79,11 @@ func TestShouldReturnErrorWhenNoRangeWasFoundAndProducedStringIsNotAValidHostnam
 	hostname := "--ddd--[1..2..."
 
 	// when
-	_, err := NewExpander().expand(hostname)
+	_, err := newExpander().expand(hostname)
 
 	// then
 	assert.Error(t, err)
-	assert.Equal(t, "Produced string `--ddd--[1..2...` is not a valid Hostname", err.Error())
+	assert.Equal(t, "produced string `--ddd--[1..2...` is not a valid Hostname", err.Error())
 }
 
 func TestShouldExpandHostnameWithMultipleRanges(t *testing.T) {
@@ -92,11 +92,11 @@ func TestShouldExpandHostnameWithMultipleRanges(t *testing.T) {
 	hostname := "x-master[1..3].myproj-prod.dc[1..2].net"
 
 	// when
-	hostnames, err := NewExpander().expand(hostname)
+	hostnames, err := newExpander().expand(hostname)
 
 	// then
 	assert.NoError(t, err)
-	assert.Equal(t, []ExpandedHostname{{
+	assert.Equal(t, []expandedHostname{{
 		Hostname:     "x-master1.myproj-prod.dc1.net",
 		Replacements: []string{"1", "1"},
 	}, {
@@ -124,11 +124,11 @@ func TestShouldReturnErrorForSingleVariation(t *testing.T) {
 	hostname := "server-[prod].myproj.net"
 
 	// when
-	hostnames, err := NewExpander().expand(hostname)
+	hostnames, err := newExpander().expand(hostname)
 
 	// then
 	assert.NoError(t, err)
-	assert.Equal(t, []ExpandedHostname{{
+	assert.Equal(t, []expandedHostname{{
 		Hostname:     "server-prod.myproj.net",
 		Replacements: []string{"prod"},
 	}}, hostnames)
@@ -141,11 +141,11 @@ func TestShouldAllowVariationOnBeginningOfHostname(t *testing.T) {
 	hostname := "[a|b]-server.myproj.net"
 
 	// when
-	hostnames, err := NewExpander().expand(hostname)
+	hostnames, err := newExpander().expand(hostname)
 
 	// then
 	assert.NoError(t, err)
-	assert.Equal(t, []ExpandedHostname{{
+	assert.Equal(t, []expandedHostname{{
 		Hostname:     "a-server.myproj.net",
 		Replacements: []string{"a"},
 	}, {
@@ -161,11 +161,11 @@ func TestShouldAllowVariationOnEndingOfHostname(t *testing.T) {
 	hostname := "server.myproj.[net|com]"
 
 	// when
-	hostnames, err := NewExpander().expand(hostname)
+	hostnames, err := newExpander().expand(hostname)
 
 	// then
 	assert.NoError(t, err)
-	assert.Equal(t, []ExpandedHostname{{
+	assert.Equal(t, []expandedHostname{{
 		Hostname:     "server.myproj.net",
 		Replacements: []string{"net"},
 	}, {
@@ -181,11 +181,11 @@ func TestShouldExpandHostnameWithVariations(t *testing.T) {
 	hostname := "server-[prod|test|dev].myproj.net"
 
 	// when
-	hostnames, err := NewExpander().expand(hostname)
+	hostnames, err := newExpander().expand(hostname)
 
 	// then
 	assert.NoError(t, err)
-	assert.Equal(t, []ExpandedHostname{{
+	assert.Equal(t, []expandedHostname{{
 		Hostname:     "server-prod.myproj.net",
 		Replacements: []string{"prod"},
 	}, {
@@ -204,11 +204,11 @@ func TestShouldExpandHostnameWithRangesAndVariations(t *testing.T) {
 	hostname := "host[1..2].server-[prod|test].myproj[5..6].net"
 
 	// when
-	hostnames, err := NewExpander().expand(hostname)
+	hostnames, err := newExpander().expand(hostname)
 
 	// then
 	assert.NoError(t, err)
-	assert.Equal(t, []ExpandedHostname{{
+	assert.Equal(t, []expandedHostname{{
 		Hostname:     "host1.server-prod.myproj5.net",
 		Replacements: []string{"1", "prod", "5"},
 	}, {

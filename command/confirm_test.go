@@ -13,7 +13,7 @@ func TestFileExists(t *testing.T) {
 	t.Parallel()
 
 	// when
-	exists, err := NewConfirm(os.Stdin).fileExists(filepath.Join(fixtureDir, "list_result"))
+	exists, err := newConfirm(os.Stdin).fileExists(filepath.Join(fixtureDir, "list_result"))
 
 	// then
 	assert.True(t, exists)
@@ -24,7 +24,7 @@ func TestFileNotExists(t *testing.T) {
 	t.Parallel()
 
 	// when
-	exists, err := NewConfirm(os.Stdin).fileExists(filepath.Join(fixtureDir, "not_exists"))
+	exists, err := newConfirm(os.Stdin).fileExists(filepath.Join(fixtureDir, "not_exists"))
 
 	// then
 	assert.False(t, exists)
@@ -35,24 +35,24 @@ func TestDirExists(t *testing.T) {
 	t.Parallel()
 
 	// when
-	exists, err := NewConfirm(os.Stdin).fileExists(fixtureDir)
+	exists, err := newConfirm(os.Stdin).fileExists(fixtureDir)
 
 	// then
 	assert.True(t, exists)
 	assert.Error(t, err)
-	assert.Equal(t, fmt.Sprintf("Path `%s` is a directory", fixtureDir), err.Error())
+	assert.Equal(t, fmt.Sprintf("path `%s` is a directory", fixtureDir), err.Error())
 }
 
 func TestInvalidPath(t *testing.T) {
 	t.Parallel()
 
 	// when
-	exists, err := NewConfirm(os.Stdin).fileExists("")
+	exists, err := newConfirm(os.Stdin).fileExists("")
 
 	// then
 	assert.False(t, exists)
 	assert.Error(t, err)
-	assert.Equal(t, "Provided path is empty", err.Error())
+	assert.Equal(t, "provided path is empty", err.Error())
 }
 
 type TestReader struct {
@@ -75,7 +75,7 @@ func TestConfirm(t *testing.T) {
 
 	// when
 	reader := NewTestReader("Y\n")
-	confirmed, err := NewConfirm(reader).RequireConfirmationIfFileExists(filepath.Join(fixtureDir, "list_result"))
+	confirmed, err := newConfirm(reader).requireConfirmationIfFileExists(filepath.Join(fixtureDir, "list_result"))
 
 	// then
 	assert.True(t, confirmed)
@@ -87,7 +87,7 @@ func TestGiveUp(t *testing.T) {
 
 	// when
 	reader := NewTestReader("nope\n")
-	confirmed, err := NewConfirm(reader).RequireConfirmationIfFileExists(filepath.Join(fixtureDir, "list_result"))
+	confirmed, err := newConfirm(reader).requireConfirmationIfFileExists(filepath.Join(fixtureDir, "list_result"))
 
 	// then
 	assert.False(t, confirmed)

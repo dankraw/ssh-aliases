@@ -1,0 +1,18 @@
+{
+  "Aggregate": true,
+  "Concurrency": 2,
+  "Deadline": "300s",
+  "Enable": [
+    "deadcode",
+    "errcheck",
+    "gocyclo",
+    "goimports",
+    "gofmt",
+    "golint",
+    "gosimple",
+    "structcheck",
+    "varcheck",
+    "vet"
+  ],
+  "Vendor": true
+}

@@ -5,24 +5,27 @@ import (
 	"strconv"
 )
 
+// Compiler is responsible for transforming ExpandingHostConfigs into an array of HostEntities.
 type Compiler struct {
-	expander     *Expander
+	expander     *expander
 	groupsRegexp *regexp.Regexp
 }
 
+// NewCompiler creates an instance of Compiler
 func NewCompiler() *Compiler {
 	return &Compiler{
-		expander:     NewExpander(),
+		expander:     newExpander(),
 		groupsRegexp: regexp.MustCompile("{#(\\d+)}"),
 	}
 }
 
-type TemplateReplacement struct {
+type templateReplacement struct {
 	beginIdx       int
 	endIdx         int
 	replacementIdx int
 }
 
+// Compile converts a single ExpandingHostConfig into list of HostEntities
 func (c *Compiler) Compile(input ExpandingHostConfig) ([]HostEntity, error) {
 	var results []HostEntity
 	expanded, err := c.expander.expand(input.HostnamePattern)
@@ -30,10 +33,10 @@ func (c *Compiler) Compile(input ExpandingHostConfig) ([]HostEntity, error) {
 		return nil, err
 	}
 	templateGroups := c.groupsRegexp.FindAllStringSubmatchIndex(input.AliasTemplate, -1)
-	var replacements []TemplateReplacement
+	var replacements []templateReplacement
 	for _, group := range templateGroups {
 		hostnameGroupSelect, _ := strconv.Atoi(input.AliasTemplate[group[2]:group[3]])
-		replacements = append(replacements, TemplateReplacement{group[0], group[1], hostnameGroupSelect - 1})
+		replacements = append(replacements, templateReplacement{group[0], group[1], hostnameGroupSelect - 1})
 	}
 	for _, h := range expanded {
 		results = append(results, HostEntity{
@@ -45,7 +48,7 @@ func (c *Compiler) Compile(input ExpandingHostConfig) ([]HostEntity, error) {
 	return results, nil
 }
 
-func (c *Compiler) compileToTargetHost(aliasTemplate string, replacements []TemplateReplacement, host ExpandedHostname) string {
+func (c *Compiler) compileToTargetHost(aliasTemplate string, replacements []templateReplacement, host expandedHostname) string {
 	if len(replacements) == 0 {
 		return aliasTemplate
 	}

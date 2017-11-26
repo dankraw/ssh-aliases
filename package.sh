@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 
-if [ -z ${TRAVIS_BRANCH+x} ]; then
-    GIT_REV=`git rev-parse --verify --short HEAD`
-    VERSION="${GIT_REV}-SNAPSHOT"
-else
-	VERSION=$TRAVIS_BRANCH
+if [ $# -eq 0 ]
+  then
+    echo "No release version specified."
+    exit 1
 fi
+
+VERSION=$1
 
 echo "Packaging ssh-aliases ${VERSION}"
 

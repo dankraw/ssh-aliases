@@ -1,9 +1,12 @@
 APP_NAME := ssh-aliases
+APP_VERSION := $(shell cat VERSION)
+
 PACKAGES := $(shell go list ./... | grep -v /vendor/)
 BUILD_FOLDER := target
 DIST_FOLDER := dist
 
-GIT_REV=$(shell git rev-parse --verify --short HEAD)
+GIT_REV = $(shell git rev-parse --verify --short HEAD)
+GIT_BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
 
 SRC = $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 
@@ -20,10 +23,11 @@ test:
 	@go test -cover ./...
 
 build: test
-	@go build -o $(BUILD_FOLDER)/$(APP_NAME) -ldflags '-s -w -X main.Version=$(GIT_REV) -extldflags "-static"'
+	@go build -o $(BUILD_FOLDER)/$(APP_NAME) \
+	-ldflags '-s -w -X main.Version=$(APP_VERSION)-$(GIT_REV)-$(GIT_BRANCH) -extldflags "-static"'
 
 release: clean lint build
-	@bash ./package.sh
+	@bash ./package.sh $(APP_VERSION)
 
 fmt: lint-deps
 	@goimports -w $(SRC)

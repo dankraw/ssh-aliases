@@ -35,6 +35,15 @@ like `instance[1..3].example.com` or `[master|slave].example.com`
 
 Binary releases for Linux and MacOS can be found on [GitHub releases page](https://github.com/dankraw/ssh-aliases/releases).
 
+### Homebrew tap
+
+MacOS users can install `ssh-aliases` easily using [Homebrew](https://brew.sh):
+
+``` console
+brew tap dankraw/ssh-aliases
+brew install ssh-aliases
+```
+
 ### Source code
 
 If you are familiar with Go: 

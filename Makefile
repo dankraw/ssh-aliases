@@ -31,7 +31,7 @@ test:
 
 build:
 	@go build -o $(BUILD_FOLDER)/$(APP_NAME) \
-	-ldflags '-s -w -X main.Version=$(APP_VERSION) -extldflags "-static"'
+	-ldflags '-s -w -X main.Version=$(APP_VERSION)'
 
 release: clean lint build
 	@bash ./package.sh $(APP_VERSION)

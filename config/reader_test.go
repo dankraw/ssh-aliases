@@ -14,34 +14,38 @@ func TestShouldReadCompleteConfigFromDir(t *testing.T) {
 	reader := NewReader()
 
 	// when
-	config, err := reader.ReadConfigs(fixtureDir)
+	ctx, err := reader.ReadConfigs(fixtureDir)
 
 	// then
 	assert.NoError(t, err)
-	assert.Equal(t, []compiler.ExpandingHostConfig{{
-		AliasName:       "service-a",
-		HostnamePattern: "service-a[1..5].example.com",
-		AliasTemplate:   "a{#1}",
-		Config: compiler.ConfigProperties{{
-			Key:   "IdentityFile",
-			Value: "a_id_rsa.pem",
-		}, {
-			Key:   "Port",
-			Value: 22,
+	assert.Equal(t, compiler.InputContext{
+		Sources: []compiler.ContextSource{
+			{
+				SourceName: "test-fixtures/example.hcl",
+				Hosts: []compiler.ExpandingHostConfig{{
+					AliasName:       "service-a",
+					HostnamePattern: "service-a[1..5].example.com",
+					AliasTemplate:   "a{#1}",
+					Config: compiler.ConfigProperties{{
+						Key:   "IdentityFile",
+						Value: "a_id_rsa.pem",
+					}, {
+						Key:   "Port",
+						Value: 22,
+					}},
+				}, {
+					AliasName:       "service-b",
+					HostnamePattern: "service-b[1..2].example.com",
+					AliasTemplate:   "b{#1}",
+					Config: compiler.ConfigProperties{{
+						Key:   "IdentityFile",
+						Value: "b_id_rsa.pem",
+					}, {
+						Key:   "Port",
+						Value: 22,
+					}},
+				}},
+			},
 		},
-		},
-	}, {
-		AliasName:       "service-b",
-		HostnamePattern: "service-b[1..2].example.com",
-		AliasTemplate:   "b{#1}",
-		Config: compiler.ConfigProperties{{
-			Key:   "IdentityFile",
-			Value: "b_id_rsa.pem",
-		}, {
-			Key:   "Port",
-			Value: 22,
-		},
-		},
-	},
-	}, config)
+	}, ctx)
 }

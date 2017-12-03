@@ -8,6 +8,17 @@ type ExpandingHostConfig struct {
 	Config          ConfigProperties
 }
 
+// InputContext is the container for all host and configs
+type InputContext struct {
+	Sources []ContextSource
+}
+
+// ContextSource is represents a single piece of source that provides host and configs definitions
+type ContextSource struct {
+	SourceName string
+	Hosts      []ExpandingHostConfig
+}
+
 // HostEntity is the outcome of ssh-alises compiler
 type HostEntity struct {
 	Host     string

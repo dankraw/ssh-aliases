@@ -8,7 +8,16 @@ import (
 	"github.com/dankraw/ssh-aliases/compiler"
 )
 
-type rawConfigContext struct {
+type rawDirContext struct {
+	RawSources []rawContextSource
+}
+
+type rawContextSource struct {
+	SourceName string
+	RawContext rawFileContext
+}
+
+type rawFileContext struct {
 	Hosts      []host     `hcl:"host"`
 	RawConfigs rawConfigs `hcl:"config"`
 }
@@ -28,22 +37,24 @@ type rawConfig []configProps
 
 type configProps map[string]interface{}
 
-func (c *rawConfigContext) toConfigPropertiesMap() (configPropertiesMap, error) {
+func (c *rawDirContext) getConfigPropertiesMap() (configPropertiesMap, error) {
 	propsMap := configPropertiesMap{}
-	for name, r := range c.RawConfigs {
-		if _, exists := propsMap[name]; exists {
-			return configPropertiesMap{}, fmt.Errorf("duplicate config with name %v", name)
-		}
-		h := configProps{}
-		for _, x := range r {
-			for k, v := range x {
-				if _, ok := h[k]; ok {
-					return configPropertiesMap{}, fmt.Errorf("duplicate config entry `%v` in host `%v`", k, name)
-				}
-				h[k] = v
+	for _, s := range c.RawSources {
+		for name, r := range s.RawContext.RawConfigs {
+			if _, exists := propsMap[name]; exists {
+				return configPropertiesMap{}, fmt.Errorf("duplicate config with name `%v`", name)
 			}
+			h := configProps{}
+			for _, x := range r {
+				for k, v := range x {
+					if _, ok := h[k]; ok {
+						return configPropertiesMap{}, fmt.Errorf("duplicate config entry `%v` in host `%v`", k, name)
+					}
+					h[k] = v
+				}
+			}
+			propsMap[name] = h.toSortedProperties()
 		}
-		propsMap[name] = h.toSortedProperties()
 	}
 	return propsMap, nil
 }
@@ -61,11 +72,8 @@ func (c *configProps) toSortedProperties() compiler.ConfigProperties {
 	return entries
 }
 
-func (c *rawConfigContext) toExpandingHostConfigs() ([]compiler.ExpandingHostConfig, error) {
-	configsMap, err := c.toConfigPropertiesMap()
-	if err != nil {
-		return nil, err
-	}
+func (c *rawFileContext) toExpandingHostConfigs(propsMap *configPropertiesMap) ([]compiler.ExpandingHostConfig, error) {
+	configsMap := *propsMap
 	var inputs []compiler.ExpandingHostConfig
 
 	aliases := map[string]host{}
@@ -106,19 +114,24 @@ func (c *rawConfigContext) toExpandingHostConfigs() ([]compiler.ExpandingHostCon
 	return inputs, nil
 }
 
-func mergeRawConfigContexts(contexts ...rawConfigContext) (rawConfigContext, error) {
-	m := rawConfigContext{
-		Hosts:      []host{},
-		RawConfigs: rawConfigs{},
+func (c *rawDirContext) toCompilerInputContext() (compiler.InputContext, error) {
+	propsMap, err := c.getConfigPropertiesMap()
+	if err != nil {
+		return compiler.InputContext{}, err
 	}
-	for _, c := range contexts {
-		m.Hosts = append(m.Hosts, c.Hosts...)
-		for n, r := range c.RawConfigs {
-			if _, ok := m.RawConfigs[n]; ok {
-				return rawConfigContext{}, fmt.Errorf("duplicate config `%s`", n)
-			}
-			m.RawConfigs[n] = r
+	var sources []compiler.ContextSource
+	for _, s := range c.RawSources {
+		expandingHostConfigs, err := s.RawContext.toExpandingHostConfigs(&propsMap)
+		if err != nil {
+			return compiler.InputContext{}, err
 		}
+		ctxSource := compiler.ContextSource{
+			SourceName: s.SourceName,
+			Hosts:      expandingHostConfigs,
+		}
+		sources = append(sources, ctxSource)
 	}
-	return m, nil
+	return compiler.InputContext{
+		Sources: sources,
+	}, nil
 }

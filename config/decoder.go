@@ -10,15 +10,15 @@ func newDecoder() *decoder {
 	return &decoder{}
 }
 
-func (d *decoder) decode(input []byte) (rawConfigContext, error) {
-	config := rawConfigContext{}
+func (d *decoder) decode(input []byte) (rawFileContext, error) {
+	config := rawFileContext{}
 	file, err := hcl.ParseBytes(input)
 	if err != nil {
-		return rawConfigContext{}, err
+		return rawFileContext{}, err
 	}
 	err = hcl.DecodeObject(&config, file)
 	if err != nil {
-		return rawConfigContext{}, err
+		return rawFileContext{}, err
 	}
 	return config, nil
 }

@@ -12,8 +12,3 @@ host "frontend" {
   alias = "front{#1}"
   config = "global"
 }
-
-config "global" {
-  identity_file = "id_rsa.pem"
-  port = 22
-}

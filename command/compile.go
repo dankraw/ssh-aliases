@@ -62,17 +62,19 @@ func newCompileCommand(writer io.Writer) *compileCommand {
 }
 
 func (c *compileCommand) execute(dir string) error {
-	inputs, err := c.configReader.ReadConfigs(dir)
+	ctx, err := c.configReader.ReadConfigs(dir)
 	if err != nil {
 		return err
 	}
 	var allResults []compiler.HostEntity
-	for _, input := range inputs {
-		results, err := c.compiler.Compile(input)
-		if err != nil {
-			return err
+	for _, s := range ctx.Sources {
+		for _, h := range s.Hosts {
+			results, err := c.compiler.Compile(h)
+			if err != nil {
+				return err
+			}
+			allResults = append(allResults, results...)
 		}
-		allResults = append(allResults, results...)
 	}
 	err = c.validator.ValidateResults(allResults)
 	if err != nil {

@@ -27,31 +27,32 @@ func newListCommand(writer io.Writer) *listCommand {
 }
 
 func (e *listCommand) execute(dir string) error {
-	files, err := e.configScanner.ScanDirectory(dir)
+	ctx, err := e.configReader.ReadConfigs(dir)
 	if err != nil {
 		return err
 	}
 	white := color.New(color.FgHiWhite)
-	for i, f := range files {
-		inputs, err := e.configReader.ReadConfig(f)
-		if err != nil {
-			return err
+	j := 0
+	for _, s := range ctx.Sources {
+		if len(s.Hosts) < 1 {
+			continue
 		}
 		fileDelimiter := ""
-		if i > 0 {
+		if j > 0 {
 			fileDelimiter = "\n"
 		}
-		_, err = white.Fprint(e.writer, fileDelimiter+f)
+		j++
+		_, err = white.Fprint(e.writer, fileDelimiter+s.SourceName)
 		if err != nil {
 			return err
 		}
-		fmt.Fprintf(e.writer, " (%d):\n", len(inputs))
-		for _, input := range inputs {
-			results, err := e.compiler.Compile(input)
+		fmt.Fprintf(e.writer, " (%d):\n", len(s.Hosts))
+		for _, h := range s.Hosts {
+			results, err := e.compiler.Compile(h)
 			if err != nil {
 				return err
 			}
-			_, err = white.Fprint(e.writer, "\n "+input.AliasName)
+			_, err = white.Fprint(e.writer, "\n "+h.AliasName)
 			if err != nil {
 				return err
 			}

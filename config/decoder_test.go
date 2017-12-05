@@ -20,7 +20,7 @@ func TestShouldDecodeConfig(t *testing.T) {
 	config, _ := newDecoder().decode(data)
 
 	// then
-	assert.Equal(t, rawConfigContext{
+	assert.Equal(t, rawFileContext{
 		Hosts: []host{{
 			Name:           "service-a",
 			Hostname:       "service-a[1..5].example.com",

@@ -13,7 +13,7 @@ type InputContext struct {
 	Sources []ContextSource
 }
 
-// ContextSource is represents a single piece of source that provides host and configs definitions
+// ContextSource represents a single piece of source that provides host and configs definitions
 type ContextSource struct {
 	SourceName string
 	Hosts      []ExpandingHostConfig

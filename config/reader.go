@@ -1,7 +1,10 @@
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
+
+	"github.com/pkg/errors"
 
 	"github.com/dankraw/ssh-aliases/compiler"
 )
@@ -27,13 +30,12 @@ func (e *Reader) ReadConfigs(dir string) (compiler.InputContext, error) {
 		return compiler.InputContext{}, err
 	}
 	var sources []rawContextSource
-
 	for _, f := range files {
 		c, err := e.decodeFile(f)
 		if err != nil {
-			return compiler.InputContext{}, err
+			return compiler.InputContext{}, errors.Wrap(err, fmt.Sprintf("failed parsing %s", f))
 		}
-		if len(c.Hosts) < 1 && len(c.RawConfigs) < 1 {
+		if len(c.Hosts) < 1 && len(c.RawConfigs) < 1 && len(c.Values) < 1 {
 			continue
 		}
 		rawSource := rawContextSource{

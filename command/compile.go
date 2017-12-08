@@ -30,8 +30,10 @@ func (c *compileSaveCommand) execute(dir string, force bool) error {
 		if err != nil {
 			return err
 		}
-		if !confirmed {
-			fmt.Println("File left unchanged.")
+		if confirmed {
+			fmt.Printf("Writing changes to %s", c.file)
+		} else {
+			fmt.Printf("Exiting without writing changes to %s", c.file)
 			return nil
 		}
 	}

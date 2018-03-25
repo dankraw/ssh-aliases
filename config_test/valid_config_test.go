@@ -56,3 +56,52 @@ func TestShouldReadCompleteConfigFromDir(t *testing.T) {
 		},
 	}, ctx)
 }
+
+func TestShouldReadFilesWithImportedConfigs(t *testing.T) {
+	t.Parallel()
+
+	// given
+	reader := config.NewReader()
+
+	// when
+	ctx, err := reader.ReadConfigs("./test_fixtures/valid/importing_configs")
+
+	// then
+	assert.NoError(t, err)
+	assert.Equal(t, compiler.InputContext{
+		Sources: []compiler.ContextSource{
+			{
+				SourceName: "test_fixtures/valid/importing_configs/example.hcl",
+				Hosts: []compiler.ExpandingHostConfig{{
+					AliasName:       "abc",
+					HostnamePattern: "servcice-abc.example.com",
+					AliasTemplate:   "abc",
+					Config: compiler.ConfigProperties{{
+						Key:   "Additional",
+						Value: "extension",
+					}, {
+						Key:   "Another",
+						Value: "one",
+					}, {
+						Key:   "X",
+						Value: "y",
+					}},
+				}, {
+					AliasName:       "def",
+					HostnamePattern: "servcice-def.example.com",
+					AliasTemplate:   "def",
+					Config: compiler.ConfigProperties{{
+						Key:   "Additional",
+						Value: "extension",
+					}, {
+						Key:   "Another",
+						Value: "one",
+					}, {
+						Key:   "SomeProp",
+						Value: 123,
+					}},
+				}},
+			},
+		},
+	}, ctx)
+}

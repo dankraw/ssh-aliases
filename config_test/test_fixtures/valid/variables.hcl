@@ -1,4 +1,4 @@
-values {
+var {
     domain1 = "my.domain1.example.com"
     domain2 = "my.domain2.example.com"
     env {

@@ -35,7 +35,7 @@ func (e *Reader) ReadConfigs(dir string) (compiler.InputContext, error) {
 		if err != nil {
 			return compiler.InputContext{}, errors.Wrap(err, fmt.Sprintf("failed parsing %s", f))
 		}
-		if len(c.Hosts) < 1 && len(c.RawConfigs) < 1 && len(c.Values) < 1 {
+		if len(c.Hosts) < 1 && len(c.RawConfigs) < 1 && len(c.Variables) < 1 {
 			continue
 		}
 		rawSource := rawContextSource{

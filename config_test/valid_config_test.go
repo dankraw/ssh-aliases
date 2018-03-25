@@ -50,7 +50,7 @@ func TestShouldReadCompleteConfigFromDir(t *testing.T) {
 					}},
 				}},
 			}, {
-				SourceName: "test_fixtures/valid/values.hcl",
+				SourceName: "test_fixtures/valid/variables.hcl",
 				Hosts:      []compiler.ExpandingHostConfig{},
 			},
 		},

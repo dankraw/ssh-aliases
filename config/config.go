@@ -19,14 +19,14 @@ type rawContextSource struct {
 }
 
 type rawFileContext struct {
-	Hosts      []host     `hcl:"host"`
-	RawConfigs rawConfigs `hcl:"config"`
-	Values     rawValues  `hcl:"values"`
+	Hosts      []host       `hcl:"host"`
+	RawConfigs rawConfigs   `hcl:"config"`
+	Variables  rawVariables `hcl:"var"`
 }
 
-type rawValues map[string]interface{}
+type rawVariables map[string]interface{}
 
-type valuesMap map[string]string
+type variablesMap map[string]string
 
 type host struct {
 	Name           string         `hcl:",key"`
@@ -43,7 +43,7 @@ type rawConfig []map[string]interface{}
 
 type configProps map[string]interface{}
 
-func (vals *valuesMap) applyTo(str string) string {
+func (vals *variablesMap) applyTo(str string) string {
 	if strings.Contains(str, "${") {
 		for k, v := range *vals {
 			str = strings.Replace(str, fmt.Sprintf("${%s}", k), v, -1)
@@ -52,12 +52,12 @@ func (vals *valuesMap) applyTo(str string) string {
 	return str
 }
 
-func interpolatedConfigProps(values *valuesMap, input []map[string]interface{}) configProps {
+func interpolatedConfigProps(variables *variablesMap, input []map[string]interface{}) configProps {
 	h := configProps{}
 	for _, x := range input {
 		for k, v := range x {
 			if vStr, ok := v.(string); ok {
-				h[k] = values.applyTo(vStr)
+				h[k] = variables.applyTo(vStr)
 			} else {
 				h[k] = v
 			}
@@ -66,11 +66,11 @@ func interpolatedConfigProps(values *valuesMap, input []map[string]interface{}) 
 	return h
 }
 
-func (c *rawDirContext) getConfigPropertiesMap(values *valuesMap) configPropertiesMap {
+func (c *rawDirContext) getConfigPropertiesMap(variables *variablesMap) configPropertiesMap {
 	propsMap := configPropertiesMap{}
 	for _, s := range c.RawSources {
 		for name, r := range s.RawContext.RawConfigs {
-			interpolated := interpolatedConfigProps(values, r)
+			interpolated := interpolatedConfigProps(variables, r)
 			propsMap[name] = interpolated.toSortedCompilerProperties()
 		}
 	}
@@ -90,15 +90,15 @@ func (c *configProps) toSortedCompilerProperties() compiler.ConfigProperties {
 	return entries
 }
 
-func (c *rawFileContext) toExpandingHostConfigs(values *valuesMap, propsMap *configPropertiesMap) ([]compiler.ExpandingHostConfig, error) {
+func (c *rawFileContext) toExpandingHostConfigs(variables *variablesMap, propsMap *configPropertiesMap) ([]compiler.ExpandingHostConfig, error) {
 	configsMap := *propsMap
 	inputs := []compiler.ExpandingHostConfig{}
 
 	for _, a := range c.Hosts {
 		input := compiler.ExpandingHostConfig{
 			AliasName:       a.Name,
-			HostnamePattern: values.applyTo(a.Hostname),
-			AliasTemplate:   values.applyTo(a.Alias),
+			HostnamePattern: variables.applyTo(a.Hostname),
+			AliasTemplate:   variables.applyTo(a.Alias),
 		}
 		if configName, ok := a.RawConfigOrRef.(string); ok {
 			if named, ok := configsMap[configName]; ok {
@@ -108,8 +108,7 @@ func (c *rawFileContext) toExpandingHostConfigs(values *valuesMap, propsMap *con
 					configName, a.Name)
 			}
 		} else if m, ok := a.RawConfigOrRef.([]map[string]interface{}); ok {
-			// @TODO duplication on parsing configs?
-			interpolated := interpolatedConfigProps(values, m)
+			interpolated := interpolatedConfigProps(variables, m)
 			input.Config = interpolated.toSortedCompilerProperties()
 		} else {
 			return nil, fmt.Errorf("invalid config definition for host `%v`", a.Name)
@@ -124,17 +123,17 @@ func (c *rawDirContext) toCompilerInputContext() (compiler.InputContext, error) 
 	if err != nil {
 		return compiler.InputContext{}, err
 	}
-	values, err := c.getNormalizedValues()
+	variables, err := c.getNormalizedVariables()
 	if err != nil {
 		return compiler.InputContext{}, err
 	}
-	propsMap := c.getConfigPropertiesMap(&values)
+	propsMap := c.getConfigPropertiesMap(&variables)
 	if err != nil {
 		return compiler.InputContext{}, err
 	}
 	var sources []compiler.ContextSource
 	for _, s := range c.RawSources {
-		expandingHostConfigs, err := s.RawContext.toExpandingHostConfigs(&values, &propsMap)
+		expandingHostConfigs, err := s.RawContext.toExpandingHostConfigs(&variables, &propsMap)
 		if err != nil {
 			return compiler.InputContext{}, err
 		}
@@ -162,33 +161,33 @@ func (c *rawDirContext) validateHosts() error {
 	return nil
 }
 
-func (c *rawDirContext) getNormalizedValues() (valuesMap, error) {
-	vals := valuesMap{}
+func (c *rawDirContext) getNormalizedVariables() (variablesMap, error) {
+	variables := variablesMap{}
 	for _, s := range c.RawSources {
-		for k, v := range s.RawContext.Values {
-			for key, value := range c.expandValue(k, v) {
-				if _, contains := vals[key]; contains {
-					return nil, fmt.Errorf("value redeclaration: %v", key)
+		for k, v := range s.RawContext.Variables {
+			for key, variable := range c.expandVariable(k, v) {
+				if _, contains := variables[key]; contains {
+					return nil, fmt.Errorf("variable redeclaration: %v", key)
 				}
-				vals[key] = value
+				variables[key] = variable
 			}
 		}
 	}
-	return vals, nil
+	return variables, nil
 }
 
-func (c *rawDirContext) expandValue(key string, value interface{}) map[string]string {
+func (c *rawDirContext) expandVariable(key string, variable interface{}) map[string]string {
 	expanded := map[string]string{}
-	if arr, ok := value.([]map[string]interface{}); ok {
+	if arr, ok := variable.([]map[string]interface{}); ok {
 		for _, m := range arr {
 			for k, v := range m {
-				for ek, ev := range c.expandValue(k, v) {
+				for ek, ev := range c.expandVariable(k, v) {
 					expanded[fmt.Sprintf("%s.%s", key, ek)] = ev
 				}
 			}
 		}
 	} else {
-		expanded[key] = fmt.Sprintf("%v", value)
+		expanded[key] = fmt.Sprintf("%v", variable)
 	}
 	return expanded
 }

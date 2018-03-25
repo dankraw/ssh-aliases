@@ -46,9 +46,9 @@ func TestShouldThrowErrorOnValueRedeclaration(t *testing.T) {
 	t.Parallel()
 
 	// when
-	_, err := reader.ReadConfigs("./test_fixtures/invalid/value_redeclaration")
+	_, err := reader.ReadConfigs("./test_fixtures/invalid/variable_redeclaration")
 
 	// then
 	assert.Error(t, err)
-	assert.Equal(t, "value redeclaration: abc.def", err.Error())
+	assert.Equal(t, "variable redeclaration: abc.def", err.Error())
 }

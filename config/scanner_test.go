@@ -20,6 +20,6 @@ func TestShouldScanDir(t *testing.T) {
 	assert.Equal(t, []string{
 		"../config_test/test_fixtures/valid/empty.hcl",
 		"../config_test/test_fixtures/valid/example.hcl",
-		"../config_test/test_fixtures/valid/values.hcl",
+		"../config_test/test_fixtures/valid/variables.hcl",
 	}, files)
 }

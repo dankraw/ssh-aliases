@@ -1,4 +1,4 @@
-values {
+var {
     abc {
         def = 1
     }

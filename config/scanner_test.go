@@ -13,13 +13,13 @@ func TestShouldScanDir(t *testing.T) {
 	scanner := NewScanner()
 
 	// when
-	files, err := scanner.ScanDirectory("../config_test/test_fixtures/valid")
+	files, err := scanner.ScanDirectory("../config_test/test_fixtures/valid/basic_with_variables")
 
 	// then
 	assert.NoError(t, err)
 	assert.Equal(t, []string{
-		"../config_test/test_fixtures/valid/empty.hcl",
-		"../config_test/test_fixtures/valid/example.hcl",
-		"../config_test/test_fixtures/valid/variables.hcl",
+		"../config_test/test_fixtures/valid/basic_with_variables/empty.hcl",
+		"../config_test/test_fixtures/valid/basic_with_variables/example.hcl",
+		"../config_test/test_fixtures/valid/basic_with_variables/variables.hcl",
 	}, files)
 }

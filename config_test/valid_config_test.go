@@ -15,14 +15,14 @@ func TestShouldReadCompleteConfigFromDir(t *testing.T) {
 	reader := config.NewReader()
 
 	// when
-	ctx, err := reader.ReadConfigs("./test_fixtures/valid")
+	ctx, err := reader.ReadConfigs("./test_fixtures/valid/basic_with_variables")
 
 	// then
 	assert.NoError(t, err)
 	assert.Equal(t, compiler.InputContext{
 		Sources: []compiler.ContextSource{
 			{
-				SourceName: "test_fixtures/valid/example.hcl",
+				SourceName: "test_fixtures/valid/basic_with_variables/example.hcl",
 				Hosts: []compiler.ExpandingHostConfig{{
 					AliasName:       "service-a",
 					HostnamePattern: "service-a[1..5].my.domain1.example.com",
@@ -50,7 +50,7 @@ func TestShouldReadCompleteConfigFromDir(t *testing.T) {
 					}},
 				}},
 			}, {
-				SourceName: "test_fixtures/valid/variables.hcl",
+				SourceName: "test_fixtures/valid/basic_with_variables/variables.hcl",
 				Hosts:      []compiler.ExpandingHostConfig{},
 			},
 		},

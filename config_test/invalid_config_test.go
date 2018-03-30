@@ -52,3 +52,25 @@ func TestShouldThrowErrorOnValueRedeclaration(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, "variable redeclaration: abc.def", err.Error())
 }
+
+func TestShouldThrowErrorOnCircularImports(t *testing.T) {
+	t.Parallel()
+
+	// when
+	_, err := reader.ReadConfigs("./test_fixtures/invalid/circular_imports")
+
+	// then
+	assert.Error(t, err)
+	assert.Equal(t, "circular import in configs (config imports chain: root -> def_conf -> root)", err.Error())
+}
+
+func TestShouldThrowErrorOnInvalidImportValue(t *testing.T) {
+	t.Parallel()
+
+	// when
+	_, err := reader.ReadConfigs("./test_fixtures/invalid/invalid_import_value")
+
+	// then
+	assert.Error(t, err)
+	assert.Equal(t, "config import statement has invalid value: 1", err.Error())
+}

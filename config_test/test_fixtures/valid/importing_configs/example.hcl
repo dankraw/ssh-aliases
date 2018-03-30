@@ -15,7 +15,12 @@ host "def" {
 
 config "def_conf" {
   some_prop = 123
-  _import = "root"
+  _import = "intermediate"
+}
+
+config "intermediate" {
+    _import = "root"
+    this = "happens"
 }
 
 config "root" {

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/dankraw/ssh-aliases/compiler"
@@ -68,6 +69,7 @@ func TestShouldReadFilesWithImportedConfigs(t *testing.T) {
 
 	// then
 	assert.NoError(t, err)
+	fmt.Printf("%+v\n", ctx)
 	assert.Equal(t, compiler.InputContext{
 		Sources: []compiler.ContextSource{
 			{
@@ -99,6 +101,9 @@ func TestShouldReadFilesWithImportedConfigs(t *testing.T) {
 					}, {
 						Key:   "SomeProp",
 						Value: 123,
+					}, {
+						Key:   "This",
+						Value: "happens",
 					}},
 				}},
 			},

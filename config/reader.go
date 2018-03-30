@@ -44,10 +44,7 @@ func (e *Reader) ReadConfigs(dir string) (compiler.InputContext, error) {
 		}
 		sources = append(sources, rawSource)
 	}
-	rawContext := rawDirContext{
-		RawSources: sources,
-	}
-	return rawContext.toCompilerInputContext()
+	return compilerInputContext(sources)
 }
 
 func (e *Reader) decodeFile(file string) (rawFileContext, error) {

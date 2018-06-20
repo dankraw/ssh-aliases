@@ -73,8 +73,7 @@ Looking at examples below will be enough to become familiar with HCL format.
 
 ### Scanned directories
 
-As you probably know, `ssh` command allows you to have just a single configuration file (`~/.ssh/config`). 
-In contrast to this, `ssh-aliases` allows you to divide configuration into multiple files depending on your needs.
+`ssh-aliases` allows you to divide your `ssh` configuration into multiple files depending on your needs.
 When running `ssh-aliases` you point it to a directory (by default it's `~/.ssh_aliases`) 
 containing any number of HCL config files. The directory will be scanned for files with `.hcl` extension.
 Keep in mind it does not scan recursively - child directories won't be considered.

@@ -61,7 +61,7 @@ func TestShouldThrowErrorOnCircularImports(t *testing.T) {
 
 	// then
 	assert.Error(t, err)
-	assert.Equal(t, "circular import in configs (config imports chain: root -> def_conf -> root)", err.Error())
+	assert.Contains(t, err.Error(), "circular import in configs")
 }
 
 func TestShouldThrowErrorOnInvalidImportValue(t *testing.T) {

@@ -64,7 +64,7 @@ func getNamedConfigProps(sources []rawContextSource, variables variablesMap) (ma
 	}
 	evaluated := map[string]configProps{}
 	for name, props := range propsMap {
-		evaluatedConfig, err := props.evaluteConfigImports(propsMap, make([]string, 0))
+		evaluatedConfig, err := props.evaluateConfigImports(propsMap, make([]string, 0))
 		if err != nil {
 			return nil, err
 		}
@@ -88,7 +88,7 @@ func expandingHostConfigs(fileCtx rawFileContext, variables variablesMap, propsM
 			}
 		} else if m, ok := a.RawConfigOrRef.([]map[string]interface{}); ok {
 			interpolated := interpolatedConfigProps(variables, m)
-			evaluated, err := interpolated.evaluteConfigImports(configsMap, make([]string, 0))
+			evaluated, err := interpolated.evaluateConfigImports(configsMap, make([]string, 0))
 			if err != nil {
 				return nil, err
 			}

@@ -1,13 +1,7 @@
-host "def" {
-  hostname = "servcice-def.example.com"
-  alias = "def"
-  config = "def_conf"
+config "Alice" {
+  _import = "Bob"
 }
 
-config "def_conf" {
-  _import = "root"
-}
-
-config "root" {
-    _import = "def_conf"
+config "Bob" {
+  _import = "Alice"
 }

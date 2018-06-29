@@ -34,7 +34,7 @@ func applyVariablesToString(str string, vals variablesMap) string {
 
 const importConfigKey = "_import"
 
-func (c configProps) evaluteConfigImports(propsMap map[string]configProps, evaluatedImports []string) (configProps, error) {
+func (c configProps) evaluateConfigImports(propsMap map[string]configProps, evaluatedImports []string) (configProps, error) {
 	evaluated := configProps{}
 	for key, value := range c {
 		if key == importConfigKey {
@@ -44,7 +44,7 @@ func (c configProps) evaluteConfigImports(propsMap map[string]configProps, evalu
 				}
 				evaluatedImports = append(evaluatedImports, importedStr)
 				if imported, ok := propsMap[importedStr]; ok {
-					evaluatedImport, err := imported.evaluteConfigImports(propsMap, evaluatedImports)
+					evaluatedImport, err := imported.evaluateConfigImports(propsMap, evaluatedImports)
 					if err != nil {
 						return nil, err
 					}

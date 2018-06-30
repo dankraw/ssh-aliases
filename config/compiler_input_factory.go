@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/dankraw/ssh-aliases/compiler"
 )
@@ -46,6 +47,9 @@ func validateHosts(sources []rawContextSource) error {
 	var exists struct{}
 	for _, s := range sources {
 		for _, h := range s.RawContext.Hosts {
+			if strings.TrimSpace(h.Alias) == "" {
+				return fmt.Errorf("host definition `%v` contains no valid alias property", h.Name)
+			}
 			if _, contains := hosts[h.Name]; contains {
 				return fmt.Errorf("duplicate host `%v`", h.Name)
 			}

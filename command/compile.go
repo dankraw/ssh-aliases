@@ -90,8 +90,9 @@ func (c *compileCommand) execute(dir string) error {
 
 func (c *compileCommand) printHostConfig(config compiler.HostEntity) {
 	fmt.Fprintf(c.writer, "Host %v\n", config.Host)
-	c.printHostConfigProperty("HostName", config.HostName)
-
+	if config.HostName != "" {
+		c.printHostConfigProperty("HostName", config.HostName)
+	}
 	for _, e := range config.Config {
 		c.printHostConfigProperty(e.Key, e.Value)
 	}

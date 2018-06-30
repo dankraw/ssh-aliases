@@ -94,3 +94,21 @@ func TestShouldAllowStaticAliasDefinitions(t *testing.T) {
 	assert.Len(t, results, 1)
 	assert.Equal(t, "master1", results[0].Host)
 }
+
+func TestShouldAllowHostDefinitionsWithoutHostnames(t *testing.T) {
+	t.Parallel()
+
+	// given
+	input := ExpandingHostConfig{
+		AliasTemplate: "*",
+	}
+
+	// when
+	results, err := NewCompiler().Compile(input)
+
+	// then
+	assert.NoError(t, err)
+	assert.Len(t, results, 1)
+	assert.Equal(t, "*", results[0].Host)
+	assert.Equal(t, "", results[0].HostName)
+}

@@ -74,3 +74,14 @@ func TestShouldThrowErrorOnInvalidImportValue(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, "config import statement has invalid value: 1", err.Error())
 }
+
+func TestShouldThrowErrorOnNoAliasSpecified(t *testing.T) {
+	t.Parallel()
+
+	// when
+	_, err := reader.ReadConfigs("./test_fixtures/invalid/no_alias_specified")
+
+	// then
+	assert.Error(t, err)
+	assert.Equal(t, "host definition `wat` contains no valid alias property", err.Error())
+}

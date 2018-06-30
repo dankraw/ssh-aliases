@@ -108,3 +108,31 @@ func TestShouldReadFilesWithImportedConfigs(t *testing.T) {
 		},
 	}, ctx)
 }
+
+func TestShouldReadHostDefinitionsWithoutHostnames(t *testing.T) {
+	t.Parallel()
+
+	// given
+	reader := config.NewReader()
+
+	// when
+	ctx, err := reader.ReadConfigs("./test_fixtures/valid/no_hostname")
+
+	// then
+	assert.NoError(t, err)
+	assert.Equal(t, compiler.InputContext{
+		Sources: []compiler.ContextSource{
+			{
+				SourceName: "test_fixtures/valid/no_hostname/wildcard.hcl",
+				Hosts: []compiler.ExpandingHostConfig{{
+					AliasName:     "all",
+					AliasTemplate: "*",
+					Config: compiler.ConfigProperties{{
+						Key:   "A",
+						Value: 1,
+					}},
+				}},
+			},
+		},
+	}, ctx)
+}

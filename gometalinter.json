@@ -5,7 +5,6 @@
   "Enable": [
     "deadcode",
     "errcheck",
-    "gocyclo",
     "goimports",
     "gofmt",
     "golint",

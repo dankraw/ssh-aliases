@@ -58,7 +58,11 @@ func (e *listCommand) execute(dir string) error {
 			}
 			fmt.Fprintf(e.writer, " (%d):\n", len(results))
 			for _, r := range results {
-				fmt.Fprintf(e.writer, "  %v: %v\n", r.Host, r.HostName)
+				if r.HostName != "" {
+					fmt.Fprintf(e.writer, "  %v: %v\n", r.Host, r.HostName)
+				} else {
+					fmt.Fprintf(e.writer, "  %v: hostname not specified\n", r.Host)
+				}
 			}
 		}
 	}

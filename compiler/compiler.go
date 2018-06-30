@@ -27,7 +27,12 @@ type templateReplacement struct {
 
 // Compile converts a single ExpandingHostConfig into list of HostEntities
 func (c *Compiler) Compile(input ExpandingHostConfig) ([]HostEntity, error) {
-	var results []HostEntity
+	if input.HostnamePattern == "" {
+		return []HostEntity{{
+			Host:   input.AliasTemplate,
+			Config: input.Config,
+		}}, nil
+	}
 	expanded, err := c.expander.expand(input.HostnamePattern)
 	if err != nil {
 		return nil, err
@@ -38,6 +43,7 @@ func (c *Compiler) Compile(input ExpandingHostConfig) ([]HostEntity, error) {
 		hostnameGroupSelect, _ := strconv.Atoi(input.AliasTemplate[group[2]:group[3]])
 		replacements = append(replacements, templateReplacement{group[0], group[1], hostnameGroupSelect - 1})
 	}
+	var results []HostEntity
 	for _, h := range expanded {
 		results = append(results, HostEntity{
 			Host:     c.compileToTargetHost(input.AliasTemplate, replacements, h),

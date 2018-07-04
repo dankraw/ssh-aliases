@@ -85,3 +85,14 @@ func TestShouldThrowErrorOnNoAliasSpecified(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, "host definition `wat` contains no valid alias property", err.Error())
 }
+
+func TestShouldThrowErrorOnNoHostnameNorConfigSpecified(t *testing.T) {
+	t.Parallel()
+
+	// when
+	_, err := reader.ReadConfigs("./test_fixtures/invalid/no_hostname_nor_config")
+
+	// then
+	assert.Error(t, err)
+	assert.Equal(t, "no config nor hostname specified for for host `wat`", err.Error())
+}

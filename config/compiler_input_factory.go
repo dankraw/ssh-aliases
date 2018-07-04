@@ -97,6 +97,10 @@ func expandingHostConfigs(fileCtx rawFileContext, variables variablesMap, propsM
 				return nil, err
 			}
 			config = sortedCompilerProperties(evaluated)
+		} else if a.RawConfigOrRef == nil {
+			if strings.TrimSpace(a.Hostname) == "" {
+				return nil, fmt.Errorf("no config nor hostname specified for for host `%v`", a.Name)
+			}
 		} else {
 			return nil, fmt.Errorf("invalid config definition for host `%v`", a.Name)
 		}

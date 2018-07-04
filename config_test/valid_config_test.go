@@ -136,3 +136,29 @@ func TestShouldReadHostDefinitionsWithoutHostnames(t *testing.T) {
 		},
 	}, ctx)
 }
+
+func TestShouldReadHostDefinitionsWithoutConfig(t *testing.T) {
+	t.Parallel()
+
+	// given
+	reader := config.NewReader()
+
+	// when
+	ctx, err := reader.ReadConfigs("./test_fixtures/valid/no_config")
+
+	// then
+	assert.NoError(t, err)
+	assert.Equal(t, compiler.InputContext{
+		Sources: []compiler.ContextSource{
+			{
+				SourceName: "test_fixtures/valid/no_config/example.hcl",
+				Hosts: []compiler.ExpandingHostConfig{{
+					AliasName:       "example",
+					AliasTemplate:   "short",
+					HostnamePattern: "long",
+					Config:          compiler.ConfigProperties{},
+				}},
+			},
+		},
+	}, ctx)
+}

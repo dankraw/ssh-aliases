@@ -1,0 +1,3 @@
+host "wat" {
+    alias = "alias"
+}

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
@@ -20,7 +21,7 @@ const hclExtension = ".hcl"
 func (s *Scanner) ScanDirectory(path string) ([]string, error) {
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error while scanning `%s`: %s", path, err.Error())
 	}
 	var hcls []string
 	for _, file := range files {

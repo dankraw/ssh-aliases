@@ -28,7 +28,7 @@ func TestShouldThrowErrorOnNotFoundConfig(t *testing.T) {
 
 	// then
 	assert.Error(t, err)
-	assert.Equal(t, "no config `wally` found (used by host `wally-host`)", err.Error())
+	assert.Equal(t, "error in `test_fixtures/invalid/config_not_found/host_only.hcl`: error in `wally-host` host definition: no config `wally` found", err.Error())
 }
 
 func TestShouldThrowErrorOnInvalidHcl(t *testing.T) {
@@ -39,7 +39,7 @@ func TestShouldThrowErrorOnInvalidHcl(t *testing.T) {
 
 	// then
 	assert.Error(t, err)
-	assert.Equal(t, "failed parsing test_fixtures/invalid/invalid_hcl/invalid.hcl: At 7:2: object expected closing RBRACE got: EOF", err.Error())
+	assert.Equal(t, "failed parsing `test_fixtures/invalid/invalid_hcl/invalid.hcl`: At 7:2: object expected closing RBRACE got: EOF", err.Error())
 }
 
 func TestShouldThrowErrorOnValueRedeclaration(t *testing.T) {
@@ -50,7 +50,7 @@ func TestShouldThrowErrorOnValueRedeclaration(t *testing.T) {
 
 	// then
 	assert.Error(t, err)
-	assert.Equal(t, "variable redeclaration: abc.def", err.Error())
+	assert.Equal(t, "error in `test_fixtures/invalid/variable_redeclaration/example.hcl`: variable redeclaration: `abc.def`", err.Error())
 }
 
 func TestShouldThrowErrorOnCircularImports(t *testing.T) {
@@ -72,7 +72,7 @@ func TestShouldThrowErrorOnInvalidImportValue(t *testing.T) {
 
 	// then
 	assert.Error(t, err)
-	assert.Equal(t, "config import statement has invalid value: 1", err.Error())
+	assert.Equal(t, "error in `test_fixtures/invalid/invalid_import_value/example.hcl`: invalid `def_conf` config definition: config import statement has invalid value: `1`", err.Error())
 }
 
 func TestShouldThrowErrorOnNoAliasSpecified(t *testing.T) {
@@ -83,7 +83,7 @@ func TestShouldThrowErrorOnNoAliasSpecified(t *testing.T) {
 
 	// then
 	assert.Error(t, err)
-	assert.Equal(t, "host definition `wat` contains no valid alias property", err.Error())
+	assert.Equal(t, "error in `test_fixtures/invalid/no_alias_specified/example.hcl`: invalid `wat` host definition: empty alias", err.Error())
 }
 
 func TestShouldThrowErrorOnNoHostnameNorConfigSpecified(t *testing.T) {
@@ -94,5 +94,49 @@ func TestShouldThrowErrorOnNoHostnameNorConfigSpecified(t *testing.T) {
 
 	// then
 	assert.Error(t, err)
-	assert.Equal(t, "no config nor hostname specified for for host `wat`", err.Error())
+	assert.Equal(t, "error in `test_fixtures/invalid/no_hostname_nor_config/example.hcl`: no config nor hostname specified for host `wat`", err.Error())
+}
+
+func TestShouldThrowErrorOnNonExistingVariableInAlias(t *testing.T) {
+	t.Parallel()
+
+	// when
+	_, err := reader.ReadConfigs("./test_fixtures/invalid/non_existing_variable/in_alias")
+
+	// then
+	assert.Error(t, err)
+	assert.Equal(t, "error in `test_fixtures/invalid/non_existing_variable/in_alias/example.hcl`: error in alias of `service-a` host definition: variable `b.c3.d4` not defined", err.Error())
+}
+
+func TestShouldThrowErrorOnNonExistingVariableInHostname(t *testing.T) {
+	t.Parallel()
+
+	// when
+	_, err := reader.ReadConfigs("./test_fixtures/invalid/non_existing_variable/in_hostname")
+
+	// then
+	assert.Error(t, err)
+	assert.Equal(t, "error in `test_fixtures/invalid/non_existing_variable/in_hostname/example.hcl`: error in hostname of `service-a` host definition: variable `b.c3.d4` not defined", err.Error())
+}
+
+func TestShouldThrowErrorOnNonExistingVariableInConfig(t *testing.T) {
+	t.Parallel()
+
+	// when
+	_, err := reader.ReadConfigs("./test_fixtures/invalid/non_existing_variable/in_config")
+
+	// then
+	assert.Error(t, err)
+	assert.Equal(t, "error in `test_fixtures/invalid/non_existing_variable/in_config/example.hcl`: error in `service-a` host definition: could not compile config property `user`: variable `b.c3.d4` not defined", err.Error())
+}
+
+func TestShouldThrowErrorOnNonExistingVariableInExternalConfig(t *testing.T) {
+	t.Parallel()
+
+	// when
+	_, err := reader.ReadConfigs("./test_fixtures/invalid/non_existing_variable/in_external_config")
+
+	// then
+	assert.Error(t, err)
+	assert.Equal(t, "error in `test_fixtures/invalid/non_existing_variable/in_external_config/example.hcl`: invalid `ext` config definition: could not compile config property `user`: variable `b.c3.d4` not defined", err.Error())
 }

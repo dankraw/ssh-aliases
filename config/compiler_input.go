@@ -30,7 +30,7 @@ func compilerInputContext(sources []rawContextSource) (compiler.InputContext, er
 	for _, s := range sources {
 		expandingHostConfigs, err := expandingHostConfigs(s.RawContext, variables, namedProps)
 		if err != nil {
-			return compiler.InputContext{}, err
+			return compiler.InputContext{}, fmt.Errorf("error in `%s`: %s", s.SourceName, err.Error())
 		}
 		ctxSources = append(ctxSources, compiler.ContextSource{
 			SourceName: s.SourceName,
@@ -48,7 +48,7 @@ func validateHosts(sources []rawContextSource) error {
 	for _, s := range sources {
 		for _, h := range s.RawContext.Hosts {
 			if strings.TrimSpace(h.Alias) == "" {
-				return fmt.Errorf("host definition `%v` contains no valid alias property", h.Name)
+				return fmt.Errorf("error in `%s`: invalid `%s` host definition: empty alias", s.SourceName, h.Name)
 			}
 			if _, contains := hosts[h.Name]; contains {
 				return fmt.Errorf("duplicate host `%v`", h.Name)
@@ -60,17 +60,23 @@ func validateHosts(sources []rawContextSource) error {
 }
 
 func getNamedConfigProps(sources []rawContextSource, variables variablesMap) (map[string]configProps, error) {
+	configToSourceMap := map[string]string{}
 	propsMap := map[string]configProps{}
 	for _, s := range sources {
 		for name, r := range s.RawContext.RawConfigs {
-			propsMap[name] = interpolatedConfigProps(variables, r)
+			configToSourceMap[name] = s.SourceName
+			interpolated, err := interpolatedConfigProps(variables, r)
+			if err != nil {
+				return nil, fmt.Errorf("error in `%s`: invalid `%s` config definition: %s", s.SourceName, name, err.Error())
+			}
+			propsMap[name] = interpolated
 		}
 	}
 	evaluated := map[string]configProps{}
 	for name, props := range propsMap {
 		evaluatedConfig, err := props.evaluateConfigImports(propsMap, make([]string, 0))
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error in `%s`: invalid `%s` config definition: %s", configToSourceMap[name], name, err.Error())
 		}
 		evaluated[name] = evaluatedConfig
 	}
@@ -87,27 +93,38 @@ func expandingHostConfigs(fileCtx rawFileContext, variables variablesMap, propsM
 			if named, ok := configsMap[configName]; ok {
 				config = sortedCompilerProperties(named)
 			} else {
-				return nil, fmt.Errorf("no config `%v` found (used by host `%v`)",
-					configName, a.Name)
+				return nil, fmt.Errorf("error in `%s` host definition: no config `%s` found",
+					a.Name, configName)
 			}
 		} else if m, ok := a.RawConfigOrRef.([]map[string]interface{}); ok {
-			interpolated := interpolatedConfigProps(variables, m)
+			interpolated, err := interpolatedConfigProps(variables, m)
+			if err != nil {
+				return nil, fmt.Errorf("error in `%s` host definition: %s", a.Name, err.Error())
+			}
 			evaluated, err := interpolated.evaluateConfigImports(configsMap, make([]string, 0))
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("error in `%s` host definition: %s", a.Name, err.Error())
 			}
 			config = sortedCompilerProperties(evaluated)
 		} else if a.RawConfigOrRef == nil {
 			if strings.TrimSpace(a.Hostname) == "" {
-				return nil, fmt.Errorf("no config nor hostname specified for for host `%v`", a.Name)
+				return nil, fmt.Errorf("no config nor hostname specified for host `%v`", a.Name)
 			}
 		} else {
 			return nil, fmt.Errorf("invalid config definition for host `%v`", a.Name)
 		}
+		interpolatedHostname, err := applyVariablesToString(a.Hostname, variables)
+		if err != nil {
+			return nil, fmt.Errorf("error in hostname of `%s` host definition: %s", a.Name, err.Error())
+		}
+		interpolatedAlias, err := applyVariablesToString(a.Alias, variables)
+		if err != nil {
+			return nil, fmt.Errorf("error in alias of `%s` host definition: %s", a.Name, err.Error())
+		}
 		inputs = append(inputs, compiler.ExpandingHostConfig{
 			AliasName:       a.Name,
-			HostnamePattern: applyVariablesToString(a.Hostname, variables),
-			AliasTemplate:   applyVariablesToString(a.Alias, variables),
+			HostnamePattern: interpolatedHostname,
+			AliasTemplate:   interpolatedAlias,
 			Config:          config,
 		})
 	}

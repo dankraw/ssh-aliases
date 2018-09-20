@@ -8,7 +8,7 @@ func normalizedVariables(sources []rawContextSource) (variablesMap, error) {
 		for k, v := range s.RawContext.Variables {
 			for key, variable := range expandVariable(k, v) {
 				if _, contains := variables[key]; contains {
-					return nil, fmt.Errorf("variable redeclaration: %v", key)
+					return nil, fmt.Errorf("error in `%s`: variable redeclaration: `%v`", s.SourceName, key)
 				}
 				variables[key] = variable
 			}

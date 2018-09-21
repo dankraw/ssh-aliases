@@ -6,8 +6,6 @@ import (
 	"strings"
 )
 
-var variableRegexp = regexp.MustCompile("\\${([a-zA-Z0-9-\\.]+)}")
-
 type configProps map[string]interface{}
 
 type variablesMap map[string]string
@@ -30,14 +28,21 @@ func interpolatedConfigProps(variables variablesMap, rawConfig []map[string]inte
 	return h, nil
 }
 
+var variableRegexp = regexp.MustCompile("\\${([^}]+)}")
+
 func applyVariablesToString(str string, vals variablesMap) (string, error) {
-	if strings.Contains(str, "${") {
-		for k, v := range vals {
-			str = strings.Replace(str, fmt.Sprintf("${%s}", k), v, -1)
-		}
-		matches := variableRegexp.FindAllStringSubmatch(str, -1)
-		if matches != nil {
-			return "", fmt.Errorf("variable `%s` not defined", matches[0][1])
+	match := variableRegexp.FindStringSubmatchIndex(str)
+	for match != nil {
+		beginMatch := match[0]
+		endMatch := match[1]
+		beginIdx := match[2]
+		endIdx := match[3]
+		varName := str[beginIdx:endIdx]
+		if value, ok := vals[varName]; ok {
+			str = str[0:beginMatch] + value + str[endMatch:]
+			match = variableRegexp.FindStringSubmatchIndex(str)
+		} else {
+			return "", fmt.Errorf("variable `%s` not defined", varName)
 		}
 	}
 	return str, nil

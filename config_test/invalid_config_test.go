@@ -116,7 +116,7 @@ func TestShouldThrowErrorOnNonExistingVariableInHostname(t *testing.T) {
 
 	// then
 	assert.Error(t, err)
-	assert.Equal(t, "error in `test_fixtures/invalid/non_existing_variable/in_hostname/example.hcl`: error in hostname of `service-a` host definition: variable `b.c3.d4` not defined", err.Error())
+	assert.Equal(t, "error in `test_fixtures/invalid/non_existing_variable/in_hostname/example.hcl`: error in hostname of `service-a` host definition: variable `b.c3ę.d4.E_F-d` not defined", err.Error())
 }
 
 func TestShouldThrowErrorOnNonExistingVariableInConfig(t *testing.T) {

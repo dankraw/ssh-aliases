@@ -20,6 +20,7 @@ like `instance[1..3].example.com` or `[master|slave].example.com`
     * [Components](#components)
         * [Host definitions](#host-definitions)
         * [Config properties](#config-properties)
+        * [Variables](#variables)
     * [Expanding hosts](#expanding-hosts)
         * [Expanding expressions](#expanding-expressions)
         * [Alias templates](#alias-templates)
@@ -143,6 +144,11 @@ config "some-config" {
   // etc.
 }
 ```
+
+#### Variables
+
+Variables are declared in object blocks marked with `var` keyword. Variables can be nested.
+
 
 ### Expanding hosts
 

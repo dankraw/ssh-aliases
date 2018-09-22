@@ -48,10 +48,10 @@ func applyVariablesToString(str string, vals variablesMap) (string, error) {
 	return str, nil
 }
 
-const importConfigKey = "_import"
+const extendConfigKey = "_extend"
 
 func (c configProps) evaluateConfigImports(propsMap map[string]configProps, evaluatedImports *[]string) (configProps, error) {
-	if value, ok := c[importConfigKey]; ok {
+	if value, ok := c[extendConfigKey]; ok {
 		evaluated := configProps{}
 		if importedStr, ok := value.(string); ok {
 			imported, err := importProps(importedStr, propsMap, evaluatedImports)
@@ -84,7 +84,7 @@ func (c configProps) evaluateConfigImports(propsMap map[string]configProps, eval
 			return nil, fmt.Errorf("config import statement has invalid value: `%v`", value)
 		}
 		for key, value := range c {
-			if key != importConfigKey {
+			if key != extendConfigKey {
 				evaluated[key] = value
 			}
 		}

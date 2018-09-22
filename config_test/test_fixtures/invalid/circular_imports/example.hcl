@@ -1,7 +1,7 @@
 config "Alice" {
-  _import = "Bob"
+  _extend = "Bob"
 }
 
 config "Bob" {
-  _import = "Alice"
+  _extend = "Alice"
 }

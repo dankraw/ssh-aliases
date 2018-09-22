@@ -1,4 +1,4 @@
-# ssh-aliases 
+# ssh-aliases
 [![Build Status](https://travis-ci.org/dankraw/ssh-aliases.svg?branch=master)](https://travis-ci.org/dankraw/ssh-aliases) 
 [![Go Report Card](https://goreportcard.com/badge/github.com/dankraw/ssh-aliases)](https://goreportcard.com/report/github.com/dankraw/ssh-aliases)
 
@@ -147,8 +147,48 @@ config "some-config" {
 
 #### Variables
 
-Variables are declared in object blocks marked with `var` keyword. Variables can be nested.
+Variables are declared in object blocks marked with `var` keyword. There may be many `var` blocks distributed along multiple files, but any variable can be defined only once.
 
+Example variables block may look like:
+
+```hcl
+var {
+    dc1 = "my.domain1.example.com"
+    dc2 = "some.other.domain2.net"
+    keys {
+        service_a = "/path/to/a_key.pem"
+        service_b = "/path/to/b_key.pem"
+    }
+    nodes {
+      service_a = 5
+    }
+    users {
+      a = "eden"
+      b = "helix"
+    }
+}
+```
+
+Variables can be nested, their lookup names are flattened during processing with `.` separator.
+In this example we have defined following variables: `dc1`, `dc2`, `keys.service_a`, `keys.service_b`, `nodes.service_a`, `users.a`, `users.b`.
+
+Variables can be used in:
+* Aliases 
+* Hostnames
+* Config properties values
+
+String interpolation with variables is done by using a `${name}` placeholder, for example:
+
+```hcl
+host "service-a" {
+  hostname = "instance[1..${nodes.service_a}].${dc1}",
+  alias = "myservice{#1}"
+  config = {
+    user = "${users.a}"
+    identity_file = "${keys.service_a}"
+  }
+}
+```
 
 ### Expanding hosts
 

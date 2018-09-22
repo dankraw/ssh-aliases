@@ -5,5 +5,5 @@ host "def" {
 }
 
 config "def_conf" {
-  _import = 1
+  _extend = 1
 }

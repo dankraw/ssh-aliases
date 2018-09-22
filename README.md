@@ -20,10 +20,12 @@ like `instance[1..3].example.com` or `[master|slave].example.com`
     * [Components](#components)
         * [Host definitions](#host-definitions)
         * [Config properties](#config-properties)
+            * [Extending configurations](#extending-configurations)
         * [Variables](#variables)
     * [Expanding hosts](#expanding-hosts)
         * [Expanding expressions](#expanding-expressions)
         * [Alias templates](#alias-templates)
+    * [Tips and tricks](#tips-and-tricks)
 * [Usage (CLI)](#usage-cli)
     * [`compile`](#compile---generating-configuration-for-ssh) - generating configuration for `ssh`
     * [`list`](#list---listing-aliases-definitions) - listing aliases definitions
@@ -145,9 +147,52 @@ config "some-config" {
 }
 ```
 
+##### Extending configurations
+
+A special property `_extend` can be used in order to include properties from other configurations.
+When importing top level properties override lower level properties. 
+
+```hcl
+config "top-level" {
+  user = "eden"
+  _extend = "lower-level"
+  # port = 2222 (will be included from below configuration)
+  # ...
+}
+
+config "lower-level" {
+  user = "helix"
+  port = 2222
+  # etc.
+}
+```
+
+A single configuration may extend multiple configurations, an array of configuration names should be provided, for example:
+
+```hcl
+config "top-level" {
+  user = "eden"
+  _extend = ["lower-level1", "lower-level2"] 
+  # configurations are included from left to right (and overridden in this order)
+  # port = 4444
+}
+
+config "lower-level1" {
+  user = "helix"
+  port = 2222
+  # etc.
+}
+
+config "lower-level2" {
+  user = "torus"
+  port = 4444
+  # etc.
+}
+```
+
 #### Variables
 
-Variables are declared in object blocks marked with `var` keyword. There may be many `var` blocks distributed along multiple files, but any variable can be defined only once.
+Variables are declared in object blocks marked with `var` keyword. There may be many `var` blocks distributed along multiple files, but variable names have global scope, so each one can be declared only once.
 
 Example variables block may look like:
 
@@ -175,7 +220,7 @@ In this example we have defined following variables: `dc1`, `dc2`, `keys.service
 Variables can be used in:
 * Aliases 
 * Hostnames
-* Config properties values
+* Config property values
 
 String interpolation with variables is done by using a `${name}` placeholder, for example:
 
@@ -257,6 +302,51 @@ dev.server1
 test.server1
 dev.server2
 test.server2
+```
+
+### Tips and tricks
+
+* Generated `ssh_config` configuration can be used not only with `ssh` command, but with other OpenSSH client commands, like `scp` and `sftp`
+* Multiple alias templates may be provided for the same host definition, for example:
+
+```hcl
+host "my-service" {
+  hostname = "instance[1..2].myservice.example.com",
+  alias = "myservice{#1} ms{#1}" # separated with space
+  config = "some-config"
+}
+```
+
+* `ssh_config` (v7.2+) ships with `Include` directive ([see docs](https://man.openbsd.org/ssh_config.5#Include)) that can be used to include other files. This can be useful for mixing `ssh-aliases` generated configs with pure `ssh_config` files:
+
+```ssh_config
+Include path/to/ssh-aliases/generated/ssh_config
+
+# below some legacy ssh config that one day may be migrated to ssh-aliases
+Host myservice
+    HostName myservice.example.com
+    User myself
+# ...
+```
+
+* `config` properties are optional when `alias` is provided:
+
+```hcl
+host "example" {
+    hostname = "my.service[1..2].example.com"
+    alias = "myservice{#1}"
+}
+```
+
+* `hostname` is optional when `config` properties are provided. This can be useful for creating wildcard (`*`) configurations that match any host:
+
+```hcl
+host "all-hosts" {
+    alias = "*"
+    config {
+        # ...
+    }
+}
 ```
 
 ## Usage (CLI)

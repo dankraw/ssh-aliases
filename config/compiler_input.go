@@ -74,7 +74,8 @@ func getNamedConfigProps(sources []rawContextSource, variables variablesMap) (ma
 	}
 	evaluated := map[string]configProps{}
 	for name, props := range propsMap {
-		evaluatedConfig, err := props.evaluateConfigImports(propsMap, make([]string, 0))
+		evaluatedImports := make([]string, 0)
+		evaluatedConfig, err := props.evaluateConfigImports(propsMap, &evaluatedImports)
 		if err != nil {
 			return nil, fmt.Errorf("error in `%s`: invalid `%s` config definition: %s", configToSourceMap[name], name, err.Error())
 		}
@@ -101,7 +102,8 @@ func expandingHostConfigs(fileCtx rawFileContext, variables variablesMap, propsM
 			if err != nil {
 				return nil, fmt.Errorf("error in `%s` host definition: %s", a.Name, err.Error())
 			}
-			evaluated, err := interpolated.evaluateConfigImports(configsMap, make([]string, 0))
+			evaluatedImports := make([]string, 0)
+			evaluated, err := interpolated.evaluateConfigImports(configsMap, &evaluatedImports)
 			if err != nil {
 				return nil, fmt.Errorf("error in `%s` host definition: %s", a.Name, err.Error())
 			}

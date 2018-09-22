@@ -15,15 +15,22 @@ host "def" {
 
 config "def_conf" {
   some_prop = 123
+  this = "never happens"
   _import = "intermediate"
 }
 
 config "intermediate" {
-    _import = "root"
+    _import = ["root", "root_2"]
     this = "happens"
 }
 
 config "root" {
     additional = "extension"
     another = "one"
+}
+
+config "root_2" {
+    additional = "extension 2"
+    another = "two"
+    _import = "root" # not a circular dependency in this case
 }

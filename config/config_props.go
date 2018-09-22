@@ -50,34 +50,58 @@ func applyVariablesToString(str string, vals variablesMap) (string, error) {
 
 const importConfigKey = "_import"
 
-func (c configProps) evaluateConfigImports(propsMap map[string]configProps, evaluatedImports []string) (configProps, error) {
-	evaluated := configProps{}
-	for key, value := range c {
-		if key == importConfigKey {
-			if importedStr, ok := value.(string); ok {
-				if contains(evaluatedImports, importedStr) {
-					return nil, fmt.Errorf("circular import in configs (config imports chain: `%s` -> `%s`)", strings.Join(evaluatedImports, " -> "), importedStr)
-				}
-				evaluatedImports = append(evaluatedImports, importedStr)
-				if imported, ok := propsMap[importedStr]; ok {
-					evaluatedImport, err := imported.evaluateConfigImports(propsMap, evaluatedImports)
+func (c configProps) evaluateConfigImports(propsMap map[string]configProps, evaluatedImports *[]string) (configProps, error) {
+	if value, ok := c[importConfigKey]; ok {
+		evaluated := configProps{}
+		if importedStr, ok := value.(string); ok {
+			imported, err := importProps(importedStr, propsMap, evaluatedImports)
+			if err != nil {
+				return nil, err
+			}
+			for k, v := range imported {
+				evaluated[k] = v
+			}
+		} else if importedArr, ok := value.([]interface{}); ok {
+			for _, importedInterface := range importedArr {
+				if importedStr, ok := importedInterface.(string); ok {
+
+					// each import branch needs a copy of evaluated imports list
+					evaluatedImportsBranch := make([]string, len(*evaluatedImports))
+					copy(evaluatedImportsBranch, *evaluatedImports)
+
+					imported, err := importProps(importedStr, propsMap, &evaluatedImportsBranch)
 					if err != nil {
 						return nil, err
 					}
-					for k, v := range evaluatedImport {
+					for k, v := range imported {
 						evaluated[k] = v
 					}
 				} else {
-					return nil, fmt.Errorf("trying to import `%s`, but such config does not exist", importedStr)
+					return nil, fmt.Errorf("config import statement has invalid value: `%v`", importedInterface)
 				}
-			} else {
-				return nil, fmt.Errorf("config import statement has invalid value: `%v`", value)
 			}
 		} else {
-			evaluated[key] = value
+			return nil, fmt.Errorf("config import statement has invalid value: `%v`", value)
 		}
+		for key, value := range c {
+			if key != importConfigKey {
+				evaluated[key] = value
+			}
+		}
+		return evaluated, nil
 	}
-	return evaluated, nil
+	return c, nil
+}
+
+func importProps(importedStr string, propsMap map[string]configProps, evaluatedImports *[]string) (configProps, error) {
+	if contains(*evaluatedImports, importedStr) {
+		return nil, fmt.Errorf("circular import in configs (config imports chain: `%s` -> `%s`)", strings.Join(*evaluatedImports, " -> "), importedStr)
+	}
+	*evaluatedImports = append(*evaluatedImports, importedStr)
+	if imported, ok := propsMap[importedStr]; ok {
+		return imported.evaluateConfigImports(propsMap, evaluatedImports)
+	}
+	return nil, fmt.Errorf("trying to import `%s`, but such config does not exist", importedStr)
 }
 
 func contains(slice []string, element string) bool {

@@ -92,16 +92,16 @@ func TestShouldReadFilesWithImportedConfigs(t *testing.T) {
 					AliasTemplate:   "def",
 					Config: compiler.ConfigProperties{{
 						Key:   "Additional",
-						Value: "extension",
+						Value: "extension 2",
 					}, {
 						Key:   "Another",
-						Value: "one",
+						Value: "two",
 					}, {
 						Key:   "SomeProp",
 						Value: 123,
 					}, {
 						Key:   "This",
-						Value: "happens",
+						Value: "never happens",
 					}},
 				}},
 			},

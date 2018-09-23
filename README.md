@@ -150,7 +150,7 @@ config "some-config" {
 ##### Extending configurations
 
 A special property `_extend` can be used in order to include properties from other configurations.
-When importing top level properties override lower level properties. 
+Top level properties override lower level properties. 
 
 ```hcl
 config "top-level" {
@@ -167,7 +167,7 @@ config "lower-level" {
 }
 ```
 
-A single configuration may extend multiple configurations, an array of configuration names should be provided, for example:
+A single configuration may extend multiple configurations, in this case an array of configuration names should be provided as the `_extend` property.
 
 ```hcl
 config "top-level" {

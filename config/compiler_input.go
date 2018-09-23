@@ -90,15 +90,17 @@ func expandingHostConfigs(fileCtx rawFileContext, variables variablesMap, propsM
 
 	for _, a := range fileCtx.Hosts {
 		config := compiler.ConfigProperties{}
-		if configName, ok := a.RawConfigOrRef.(string); ok {
-			if named, ok := configsMap[configName]; ok {
+
+		switch v := a.RawConfigOrRef.(type) {
+		case string:
+			if named, ok := configsMap[v]; ok {
 				config = sortedCompilerProperties(named)
 			} else {
 				return nil, fmt.Errorf("error in `%s` host definition: no config `%s` found",
-					a.Name, configName)
+					a.Name, v)
 			}
-		} else if m, ok := a.RawConfigOrRef.([]map[string]interface{}); ok {
-			interpolated, err := interpolatedConfigProps(variables, m)
+		case []map[string]interface{}:
+			interpolated, err := interpolatedConfigProps(variables, v)
 			if err != nil {
 				return nil, fmt.Errorf("error in `%s` host definition: %s", a.Name, err.Error())
 			}
@@ -108,13 +110,14 @@ func expandingHostConfigs(fileCtx rawFileContext, variables variablesMap, propsM
 				return nil, fmt.Errorf("error in `%s` host definition: %s", a.Name, err.Error())
 			}
 			config = sortedCompilerProperties(evaluated)
-		} else if a.RawConfigOrRef == nil {
+		case nil:
 			if strings.TrimSpace(a.Hostname) == "" {
 				return nil, fmt.Errorf("no config nor hostname specified for host `%v`", a.Name)
 			}
-		} else {
+		default:
 			return nil, fmt.Errorf("invalid config definition for host `%v`", a.Name)
 		}
+
 		interpolatedHostname, err := applyVariablesToString(a.Hostname, variables)
 		if err != nil {
 			return nil, fmt.Errorf("error in hostname of `%s` host definition: %s", a.Name, err.Error())

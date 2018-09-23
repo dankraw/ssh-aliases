@@ -66,7 +66,7 @@ func NewTestReader(response string) *TestReader {
 }
 
 func (r *TestReader) Read(p []byte) (n int, err error) {
-	copy(p[:], r.response)
+	copy(p, r.response)
 	return len(r.response), nil
 }
 

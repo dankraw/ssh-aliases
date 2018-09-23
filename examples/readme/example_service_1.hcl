@@ -6,6 +6,6 @@ host "abc" {
 
 config "abc-config" {
   user = "ubuntu"
-  identity_file = "~/.ssh/abc.pem"
+  identity_file = "${keys.abc}"
   port = 22
 }

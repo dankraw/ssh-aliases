@@ -377,13 +377,13 @@ asks for confirmation if the file exists (unless `--force` is used) and overwrit
 
 Example command run with all options provided:
 
-``` console
+```console
 $ ssh-aliases --scan ~/my_custom_dir compile --save --file ~/.ssh/ssh_aliases_config --force 
 ```
 
-Now, let's suppose we have `./examples/readme` directory that contains two files:
+Now, let's suppose we have `./examples/readme` directory that contains 3 files:
 
-``` hcl
+```hcl
 # ./example/readme/example_service_1.hcl
 host "abc" {
   hostname = "node[1..2].abc.[dev|test].example.com"
@@ -393,21 +393,31 @@ host "abc" {
 
 config "abc-config" {
   user = "ubuntu"
-  identity_file = "~/.ssh/abc.pem"
+  identity_file = "${keys.abc}"
   port = 22
 }
 ```
 
-``` hcl
+```hcl
 # ./example/readme/example_service_2.hcl
 host "other" {
   hostname = "other[1..2].example.com"
   alias = "other{#1}"
-  config = {
+  config {
     user = "lurker"
-    identity_file = "~/.ssh/other.pem"
+    identity_file = "${keys.other}"
     port = 22
   }
+}
+```
+
+```hcl
+# ./example/readme/variables.hcl
+var {
+    keys {
+        abc = "~/.ssh/abc.pem"
+        other = "~/.ssh/other.pem"
+    }
 }
 ```
 

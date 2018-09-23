@@ -84,9 +84,10 @@ Keep in mind it does not scan recursively - child directories won't be considere
 ### Components
 
 A single config file may contain any number of components defined in it. 
-Currently there are two types of components:
+Currently there are three types of components:
 * [Host definitions](#host-definitions)
 * [Config properties](#config-properties)
+* [Variables](#variables)
 
 #### Host definitions
 

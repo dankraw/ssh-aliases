@@ -1,6 +1,7 @@
 package compiler
 
 import (
+	"fmt"
 	"regexp"
 	"strconv"
 )
@@ -37,12 +38,7 @@ func (c *Compiler) Compile(input ExpandingHostConfig) ([]HostEntity, error) {
 	if err != nil {
 		return nil, err
 	}
-	templateGroups := c.groupsRegexp.FindAllStringSubmatchIndex(input.AliasTemplate, -1)
-	var replacements []templateReplacement
-	for _, group := range templateGroups {
-		hostnameGroupSelect, _ := strconv.Atoi(input.AliasTemplate[group[2]:group[3]])
-		replacements = append(replacements, templateReplacement{group[0], group[1], hostnameGroupSelect - 1})
-	}
+	replacements := c.aliasReplacementGroups(input.AliasTemplate)
 	var results []HostEntity
 	for _, h := range expanded {
 		results = append(results, HostEntity{
@@ -74,4 +70,41 @@ func (c *Compiler) compileToTargetHost(aliasTemplate string, replacements []temp
 		}
 	}
 	return alias
+}
+
+// CompileRegexp compiles regexp ExpandingHostConfig against provided InputHosts
+func (c *Compiler) CompileRegexp(input ExpandingHostConfig, hosts InputHosts) ([]HostEntity, error) {
+	re, err := regexp.Compile(input.HostnamePattern)
+	if err != nil {
+		return nil, fmt.Errorf("error compiling hostname pattern of %s: %s", input.AliasName, err.Error())
+	}
+	replacements := c.aliasReplacementGroups(input.AliasTemplate)
+	var results []HostEntity
+	for _, host := range hosts {
+		match := re.FindAllStringSubmatch(host, -1)
+		if match != nil {
+			for _, matchedHost := range match {
+				h := expandedHostname{
+					Hostname:     matchedHost[0],
+					Replacements: matchedHost[1:],
+				}
+				results = append(results, HostEntity{
+					Host:     c.compileToTargetHost(input.AliasTemplate, replacements, h),
+					HostName: h.Hostname,
+					Config:   input.Config,
+				})
+			}
+		}
+	}
+	return results, nil
+}
+
+func (c *Compiler) aliasReplacementGroups(aliasTemplate string) []templateReplacement {
+	templateGroups := c.groupsRegexp.FindAllStringSubmatchIndex(aliasTemplate, -1)
+	var replacements []templateReplacement
+	for _, group := range templateGroups {
+		hostnameGroupSelect, _ := strconv.Atoi(aliasTemplate[group[2]:group[3]])
+		replacements = append(replacements, templateReplacement{group[0], group[1], hostnameGroupSelect - 1})
+	}
+	return replacements
 }

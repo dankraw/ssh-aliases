@@ -8,6 +8,9 @@ type ExpandingHostConfig struct {
 	Config          ConfigProperties
 }
 
+// InputHosts is a list of hosts that can be used by the compiler to process RegexpHostConfig
+type InputHosts []string
+
 // InputContext is the container for all host and configs
 type InputContext struct {
 	Sources []ContextSource

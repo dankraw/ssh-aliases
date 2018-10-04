@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const dir = "readme"
+const dir = "files"
 
 func TestCompileCommandExecute(t *testing.T) {
 	t.Parallel()

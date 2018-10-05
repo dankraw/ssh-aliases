@@ -40,6 +40,7 @@ func configureCLI(version string, writer io.Writer) (*cli.App, error) {
 	var save bool
 	var force bool
 	var file string
+	var hostsFile string
 
 	app := cli.NewApp()
 	app.Version = version
@@ -57,8 +58,19 @@ func configureCLI(version string, writer io.Writer) (*cli.App, error) {
 		Name:    "list",
 		Aliases: []string{"l"},
 		Usage:   "Prints the list of host definitions",
+		Flags: []cli.Flag{
+			cli.StringFlag{
+				Name:        "hosts-file",
+				Usage:       "input hosts file for regexp compilation",
+				Destination: &hostsFile,
+			},
+		},
 		Action: func(ctx *cli.Context) error {
-			err := newListCommand(writer).execute(scanDir)
+			hosts, err := readHostsFile(hostsFile)
+			if err != nil {
+				return cli.NewExitError(err.Error(), 1)
+			}
+			err = newListCommand(writer).execute(scanDir, hosts)
 			if err != nil {
 				return cli.NewExitError(err.Error(), 1)
 			}
@@ -85,13 +97,22 @@ func configureCLI(version string, writer io.Writer) (*cli.App, error) {
 				Usage:       "overwrite existing file without confirmation",
 				Destination: &force,
 			},
+			cli.StringFlag{
+				Name:        "hosts-file",
+				Usage:       "input hosts file for regexp compilation",
+				Destination: &hostsFile,
+			},
 		},
 		Action: func(ctx *cli.Context) error {
 			var err error
+			hosts, err := readHostsFile(hostsFile)
+			if err != nil {
+				return cli.NewExitError(err.Error(), 1)
+			}
 			if save {
-				err = newCompileSaveCommand(file).execute(scanDir, force)
+				err = newCompileSaveCommand(file).execute(scanDir, force, hosts)
 			} else {
-				err = newCompileCommand(writer).execute(scanDir)
+				err = newCompileCommand(writer).execute(scanDir, hosts)
 			}
 			if err != nil {
 				return cli.NewExitError(err.Error(), 1)

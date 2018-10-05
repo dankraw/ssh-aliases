@@ -18,9 +18,10 @@ func TestListCommandExecute(t *testing.T) {
 
 	// given
 	buffer := new(bytes.Buffer)
+	hosts := []string{}
 
 	// when
-	err := newListCommand(buffer).execute(fixtureDir)
+	err := newListCommand(buffer).execute(fixtureDir, hosts)
 
 	// then
 	assert.NoError(t, err)

@@ -24,7 +24,7 @@ func newCompileSaveCommand(file string) *compileSaveCommand {
 	}
 }
 
-func (c *compileSaveCommand) execute(dir string, force bool) error {
+func (c *compileSaveCommand) execute(dir string, force bool, hosts []string) error {
 	if !force {
 		confirmed, err := c.confirm.requireConfirmationIfFileExists(c.file)
 		if err != nil {
@@ -38,7 +38,7 @@ func (c *compileSaveCommand) execute(dir string, force bool) error {
 		}
 	}
 	buffer := new(bytes.Buffer)
-	err := newCompileCommand(buffer).execute(dir)
+	err := newCompileCommand(buffer).execute(dir, hosts)
 	if err != nil {
 		return err
 	}
@@ -63,7 +63,7 @@ func newCompileCommand(writer io.Writer) *compileCommand {
 	}
 }
 
-func (c *compileCommand) execute(dir string) error {
+func (c *compileCommand) execute(dir string, hosts []string) error {
 	ctx, err := c.configReader.ReadConfigs(dir)
 	if err != nil {
 		return err
@@ -71,7 +71,7 @@ func (c *compileCommand) execute(dir string) error {
 	var allResults []compiler.HostEntity
 	for _, s := range ctx.Sources {
 		for _, h := range s.Hosts {
-			results, err := c.compiler.Compile(h)
+			results, err := c.compileHost(h, hosts)
 			if err != nil {
 				return err
 			}
@@ -86,6 +86,14 @@ func (c *compileCommand) execute(dir string) error {
 		c.printHostConfig(result)
 	}
 	return nil
+}
+
+func (c *compileCommand) compileHost(host compiler.ExpandingHostConfig, hosts []string) ([]compiler.HostEntity, error) {
+	if host.IsRegexpHostDefinition() {
+		result, err := c.compiler.CompileRegexp(host, hosts)
+		return result, err
+	}
+	return c.compiler.Compile(host)
 }
 
 func (c *compileCommand) printHostConfig(config compiler.HostEntity) {

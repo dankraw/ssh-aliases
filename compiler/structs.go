@@ -1,11 +1,21 @@
 package compiler
 
+import (
+	"strings"
+)
+
 // ExpandingHostConfig is the input for the ssh-aliases compiler
 type ExpandingHostConfig struct {
 	AliasName       string
 	HostnamePattern string
 	AliasTemplate   string
 	Config          ConfigProperties
+}
+
+// IsRegexpHostDefinition checks if the specified host definition should be compiled
+// as a regexp against provided hosts input  file
+func (e *ExpandingHostConfig) IsRegexpHostDefinition() bool {
+	return strings.Contains(e.HostnamePattern, "(")
 }
 
 // InputHosts is a list of hosts that can be used by the compiler to process RegexpHostConfig

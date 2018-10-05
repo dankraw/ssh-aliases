@@ -1,0 +1,16 @@
+files/config.hcl (2):
+
+ dc1-services (9):
+  prod.aaa-frontend1.dc1: ab-frontend1.aaa-prod.my.dc1.com
+  prod.bbb-frontend1.dc1: ab-frontend1.bbb-prod.my.dc1.com
+  prod.aaa-frontend2.dc1: ab-frontend2.aaa-prod.my.dc1.com
+  prod.bbb-frontend2.dc1: ab-frontend2.bbb-prod.my.dc1.com
+  prod.aaa-frontend3.dc1: ab-frontend3.aaa-prod.my.dc1.com
+  test.aaa-frontend1.dc1: ab-frontend1.aaa-test.my.dc1.com
+  test.aaa-frontend2.dc1: ab-frontend2.aaa-test.my.dc1.com
+  prod.aaa-backend100.dc1: ab-backend100.aaa-prod.my.dc1.com
+  prod.aaa-backend102.dc1: ab-backend102.aaa-prod.my.dc1.com
+
+ dc2-services (2):
+  prod.bbb-frontend5.dc2: ab-frontend5.bbb-prod.my.dc2.net
+  prod.bbb-frontend6.dc2: ab-frontend6.bbb-prod.my.dc2.net

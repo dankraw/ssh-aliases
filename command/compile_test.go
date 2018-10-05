@@ -15,9 +15,10 @@ func TestCompileCommandExecute(t *testing.T) {
 
 	// given
 	buffer := new(bytes.Buffer)
+	hosts := []string{}
 
 	// when
-	err := newCompileCommand(buffer).execute(fixtureDir)
+	err := newCompileCommand(buffer).execute(fixtureDir, hosts)
 
 	// then
 	assert.NoError(t, err)

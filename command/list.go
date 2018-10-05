@@ -26,7 +26,7 @@ func newListCommand(writer io.Writer) *listCommand {
 	}
 }
 
-func (e *listCommand) execute(dir string) error {
+func (e *listCommand) execute(dir string, hosts []string) error {
 	ctx, err := e.configReader.ReadConfigs(dir)
 	if err != nil {
 		return err
@@ -48,7 +48,7 @@ func (e *listCommand) execute(dir string) error {
 		}
 		fmt.Fprintf(e.writer, " (%d):\n", len(s.Hosts))
 		for _, h := range s.Hosts {
-			results, err := e.compiler.Compile(h)
+			results, err := e.compileHost(h, hosts)
 			if err != nil {
 				return err
 			}
@@ -67,4 +67,11 @@ func (e *listCommand) execute(dir string) error {
 		}
 	}
 	return nil
+}
+
+func (e *listCommand) compileHost(host compiler.ExpandingHostConfig, hosts []string) ([]compiler.HostEntity, error) {
+	if host.IsRegexpHostDefinition() {
+		return e.compiler.CompileRegexp(host, hosts)
+	}
+	return e.compiler.Compile(host)
 }

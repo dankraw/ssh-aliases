@@ -1,0 +1,33 @@
+Host prod.aaa-frontend1.dc1
+     HostName ab-frontend1.aaa-prod.my.dc1.com
+
+Host prod.bbb-frontend1.dc1
+     HostName ab-frontend1.bbb-prod.my.dc1.com
+
+Host prod.aaa-frontend2.dc1
+     HostName ab-frontend2.aaa-prod.my.dc1.com
+
+Host prod.bbb-frontend2.dc1
+     HostName ab-frontend2.bbb-prod.my.dc1.com
+
+Host prod.aaa-frontend3.dc1
+     HostName ab-frontend3.aaa-prod.my.dc1.com
+
+Host test.aaa-frontend1.dc1
+     HostName ab-frontend1.aaa-test.my.dc1.com
+
+Host test.aaa-frontend2.dc1
+     HostName ab-frontend2.aaa-test.my.dc1.com
+
+Host prod.aaa-backend100.dc1
+     HostName ab-backend100.aaa-prod.my.dc1.com
+
+Host prod.aaa-backend102.dc1
+     HostName ab-backend102.aaa-prod.my.dc1.com
+
+Host prod.bbb-frontend5.dc2
+     HostName ab-frontend5.bbb-prod.my.dc2.net
+
+Host prod.bbb-frontend6.dc2
+     HostName ab-frontend6.bbb-prod.my.dc2.net
+

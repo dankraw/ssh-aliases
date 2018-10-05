@@ -1,0 +1,17 @@
+github.com
+localhost
+ab-frontend1.aaa-prod.my.dc1.com
+ab-frontend1.bbb-prod.my.dc1.com
+ab-frontend2.aaa-prod.my.dc1.com
+ab-frontend2.bbb-prod.my.dc1.com
+ab-frontend3.aaa-prod.my.dc1.com
+ab-frontend5.bbb-prod.my.dc2.net
+ab-frontend6.bbb-prod.my.dc2.net
+cc-host1.ccc-prod.my.dc2.net
+
+ab-frontend1.aaa-test.my.dc1.com
+ab-frontend2.aaa-test.my.dc1.com
+ab-backend100.aaa-prod.my.dc1.com
+ab-backend102.aaa-prod.my.dc1.com
+ab-backend11.aaa.dev.my.dc1.com
+# some comment

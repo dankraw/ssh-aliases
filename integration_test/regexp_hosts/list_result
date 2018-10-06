@@ -1,4 +1,4 @@
-files/config.hcl (2):
+regexp_hosts/config.hcl (2):
 
  dc1-services (9):
   prod.aaa-frontend1.dc1: ab-frontend1.aaa-prod.my.dc1.com

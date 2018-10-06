@@ -1,4 +1,4 @@
-files/example_service_1.hcl (1):
+readme/example_service_1.hcl (1):
 
  abc (4):
   dev.abc1: node1.abc.dev.example.com
@@ -6,7 +6,7 @@ files/example_service_1.hcl (1):
   test.abc1: node1.abc.test.example.com
   test.abc2: node2.abc.test.example.com
 
-files/example_service_2.hcl (1):
+readme/example_service_2.hcl (1):
 
  other (2):
   other1: other1.example.com

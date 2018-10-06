@@ -34,6 +34,12 @@ func (c *Compiler) Compile(input ExpandingHostConfig) ([]HostEntity, error) {
 			Config: input.Config,
 		}}, nil
 	}
+	if input.AliasTemplate == "" {
+		return []HostEntity{{
+			Host:   input.HostnamePattern,
+			Config: input.Config,
+		}}, nil
+	}
 	expanded, err := c.expander.expand(input.HostnamePattern)
 	if err != nil {
 		return nil, err

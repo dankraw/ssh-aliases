@@ -61,7 +61,7 @@ func (e *listCommand) execute(dir string, hosts []string) error {
 				if r.HostName != "" {
 					fmt.Fprintf(e.writer, "  %v: %v\n", r.Host, r.HostName)
 				} else {
-					fmt.Fprintf(e.writer, "  %v: hostname not specified\n", r.Host)
+					fmt.Fprintf(e.writer, "  %v\n", r.Host)
 				}
 			}
 		}

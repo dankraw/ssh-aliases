@@ -47,8 +47,8 @@ func validateHosts(sources []rawContextSource) error {
 	var exists struct{}
 	for _, s := range sources {
 		for _, h := range s.RawContext.Hosts {
-			if strings.TrimSpace(h.Alias) == "" {
-				return fmt.Errorf("error in `%s`: invalid `%s` host definition: empty alias", s.SourceName, h.Name)
+			if strings.TrimSpace(h.Alias) == "" && strings.TrimSpace(h.Hostname) == "" {
+				return fmt.Errorf("error in `%s`: invalid `%s` host definition: alias and hostname are both empty or undefined", s.SourceName, h.Name)
 			}
 			if _, contains := hosts[h.Name]; contains {
 				return fmt.Errorf("duplicate host `%v`", h.Name)

@@ -1,0 +1,7 @@
+hostname_only/example.hcl (2):
+
+ all (1):
+  *
+
+ prod (1):
+  prod*

@@ -1,0 +1,6 @@
+Host *
+     A 1
+
+Host prod*
+     A 2
+

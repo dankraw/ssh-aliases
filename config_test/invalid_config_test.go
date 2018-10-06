@@ -79,11 +79,11 @@ func TestShouldThrowErrorOnNoAliasSpecified(t *testing.T) {
 	t.Parallel()
 
 	// when
-	_, err := reader.ReadConfigs("./test_fixtures/invalid/no_alias_specified")
+	_, err := reader.ReadConfigs("./test_fixtures/invalid/alias_and_hostname_not_specified")
 
 	// then
 	assert.Error(t, err)
-	assert.Equal(t, "error in `test_fixtures/invalid/no_alias_specified/example.hcl`: invalid `wat` host definition: empty alias", err.Error())
+	assert.Equal(t, "error in `test_fixtures/invalid/alias_and_hostname_not_specified/example.hcl`: invalid `wat` host definition: alias and hostname are both empty or undefined", err.Error())
 }
 
 func TestShouldThrowErrorOnNoHostnameNorConfigSpecified(t *testing.T) {

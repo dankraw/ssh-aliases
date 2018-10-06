@@ -131,6 +131,13 @@ func TestShouldReadHostDefinitionsWithoutHostnames(t *testing.T) {
 						Key:   "A",
 						Value: 1,
 					}},
+				}, {
+					AliasName:       "prod",
+					HostnamePattern: "prod*",
+					Config: compiler.ConfigProperties{{
+						Key:   "A",
+						Value: 2,
+					}},
 				}},
 			},
 		},

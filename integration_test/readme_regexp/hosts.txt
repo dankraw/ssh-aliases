@@ -1,0 +1,7 @@
+instance1.my-service-evo.example.com
+instance1.my-service-dev.example.com
+instance1.my-service-test.example.com
+instance2.my-service-test.example.com
+instance1.my-service-prod.example.com
+instance2.my-service-prod.example.com
+instance3.my-service-prod.example.com

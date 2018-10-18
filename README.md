@@ -8,7 +8,8 @@ In short, `ssh-aliases`:
 * combines multiple [human friendly config files](#configuration-files) into a single `ssh` config file
 * is able to generate a list of hosts out of a single entry by using [expanding expressions](#expanding-expressions), 
 like `instance[1..3].example.com` or `[master|slave].example.com`
-* creates aliases for hosts by compiling [templates](#alias-templates) (no need to write regexps)
+* is able to generate aliases for provided (as an input file) lists of hosts [using regular expressions matching](#using-regular-expressions-to-match-existing-hostnames)
+* creates aliases for hosts by compiling [templates](#alias-templates)
 * allows multiple hosts reuse the same `ssh` configuration
 * is a single binary file
 
@@ -25,6 +26,7 @@ like `instance[1..3].example.com` or `[master|slave].example.com`
     * [Expanding hosts](#expanding-hosts)
         * [Expanding expressions](#expanding-expressions)
         * [Alias templates](#alias-templates)
+    * [Using regular expressions to match existing hostnames](#using-regular-expressions-to-match-existing-hostnames)
     * [Tips and tricks](#tips-and-tricks)
 * [Usage (CLI)](#usage-cli)
     * [`compile`](#compile---generating-configuration-for-ssh) - generating configuration for `ssh`
@@ -93,7 +95,8 @@ Currently there are three types of components:
 
 A host definition consists of a `host` keyword and it's globally unique (among all scanned files) name.
 Each `host` should contain following attributes:
-* `hostname` - is a target hostname, possibly containing [expanding expressions](#expanding-hosts)
+* `hostname` - is a target hostname, possibly containing [expanding expressions](#expanding-hosts) 
+   or it may be a [regular expression matching selected group of hosts](#using-regular-expressions-to-match-existing-hostnames)
 * `alias` - is an alias template for the destination hostname
 * `config` - an embedded [config properties](#config-properties) definition, or a name (a `string`) that points 
 to existing properties definition in the same or any other configuration file
@@ -119,6 +122,16 @@ or (when pointing an external config named `my-service-config`)
 host "my-service" {
   hostname = "instance[1..2].my-service.example.com",
   alias = "myservice{#1}"
+  config = "my-service-config"
+}
+```
+
+or (when using regular expression to match selected hosts from user input)
+
+```hcl
+host "my-service" {
+  hostname = "instance\\-(\\d+)\\.my\\-service\\-([a-z]+)\\..+dc1.+",
+  alias = "{#2}.myservice{#1}.dc1"
   config = "my-service-config"
 }
 ```
@@ -238,9 +251,9 @@ host "service-a" {
 
 ### Expanding hosts
 
-The most important feature of `ssh-aliases` is *hosts expansion*.
+One of the most important features of `ssh-aliases` is *hosts expansion*.
 It's a mechanism of generating multiple `Host ...` entries in the destination `ssh_config` out of a single [host definition](#host-definitions).
-It is done by using *range expressions* in hostnames and compiling host aliases from templates.
+It is done by using *expanding expressions* in hostnames and compiling host aliases from templates.
 
 #### Expanding expressions
 
@@ -305,6 +318,98 @@ dev.server2
 test.server2
 ```
 
+### Using regular expressions to match existing hostnames
+
+Alternatively, instead of defining [expanding expressions](#expanding-expressions) by hand, user can provide 
+a list of existing hosts as an input file and define regular expressions that match selected groups of hosts, 
+`ssh-aliases` will generate aliases and hook proper configurations to matched hosts.
+
+For example, the user is able to fetch from some kind of cloud service API or 
+[an asset management system](https://github.com/allegro/ralph)
+(or will just `cat ~/.ssh/known_hosts | cut -f 1 -d ',' | cut -f 1 -d ' '`) a list of nodes that is allowed to log into:
+
+```
+instance1.my-service-evo.example.com
+instance1.my-service-dev.example.com
+instance1.my-service-test.example.com
+instance2.my-service-test.example.com
+instance1.my-service-prod.example.com
+instance2.my-service-prod.example.com
+instance3.my-service-prod.example.com
+```
+
+If there are patterns existing between some of these hosts, a regular expression can be defined to match them, 
+in this case `"instance(\\d+)\\.my\\-service\\-(dev|prod|test)\\..+"`. 
+Note there are two groups being captured `(\\d+)` for instance number and `(dev|prod|test)` for host environment 
+(we want to omit the experimental `evo` environment).
+In order to place the captured group value into the alias use the `{#n}` placeholder, 
+same as for [expanding expressions](#alias-templates).
+
+[Host definitions](#host-definitions) with a hostname containing at least a single group capturing statement 
+(starting with a "`(`" parenthesis) are considered as regexp hosts type, and [expanding expressions](#expanding-expressions) 
+are not applied to them. Of course, both types of hosts can be mixed in the same `ssh-aliases` configuration (file or directory).
+
+```hcl
+host "dc1-services" {
+  hostname = "instance(\\d+)\\.my\\-service\\-(dev|prod|test)\\..+"
+  alias = "host{#1}.{#2}"
+  config {
+    user = "abc"
+    identity_file = "~/.ssh/key.pem"
+  }
+}
+```
+
+[Compiling the aliases](#compile---generating-configuration-for-ssh) with `--hosts-file /path/to/hosts_file.txt` option will generate:
+
+```
+Host host1.dev
+     HostName instance1.my-service-dev.example.com
+     IdentityFile ~/.ssh/key.pem
+     User abc
+
+Host host1.test
+     HostName instance1.my-service-test.example.com
+     IdentityFile ~/.ssh/key.pem
+     User abc
+
+Host host2.test
+     HostName instance2.my-service-test.example.com
+     IdentityFile ~/.ssh/key.pem
+     User abc
+
+Host host1.prod
+     HostName instance1.my-service-prod.example.com
+     IdentityFile ~/.ssh/key.pem
+     User abc
+
+Host host2.prod
+     HostName instance2.my-service-prod.example.com
+     IdentityFile ~/.ssh/key.pem
+     User abc
+
+Host host3.prod
+     HostName instance3.my-service-prod.example.com
+     IdentityFile ~/.ssh/key.pem
+     User abc
+```
+
+[Printing the list of aliases](#list---listing-aliases-definitions) accordingly would print:
+
+```
+config.hcl (1):
+
+ dc1-services (6):
+  host1.dev: instance1.my-service-dev.example.com
+  host1.test: instance1.my-service-test.example.com
+  host2.test: instance2.my-service-test.example.com
+  host1.prod: instance1.my-service-prod.example.com
+  host2.prod: instance2.my-service-prod.example.com
+  host3.prod: instance3.my-service-prod.example.com
+
+```
+
+
 ### Tips and tricks
 
 * Generated `ssh_config` configuration can be used not only with `ssh` command, but with other OpenSSH client commands, like `scp` and `sftp`
@@ -339,11 +444,11 @@ host "example" {
 }
 ```
 
-* `hostname` is optional when `config` properties are provided. This can be useful for creating wildcard (`*`) configurations that match any host:
+* `alias` (or `hostname` when `alias` is provided) is optional when `config` properties are provided. This can be useful for creating wildcard (`*`) configurations that match any host:
 
 ```hcl
 host "all-hosts" {
-    alias = "*"
+    hostname = "*" # or alias = "*"
     config {
         # ...
     }
@@ -370,6 +475,7 @@ and compiles configuration for `ssh`.
 
 Options for `compile`
 
+* `--hosts-file` - input hosts file for regexp compilation (each hostname in new line)
 * `--save` - adding this option makes `ssh-aliases` save the output to the file instead of printing to `stdout`, 
 asks for confirmation if the file exists (unless `--force` is used) and overwrites its contents if accepted
 * `--file <PATH>` - when using `--save` it tells where should the file be saved, defaults to `~/.ssh/config`
@@ -473,6 +579,9 @@ Host other2
 `list` command should be used to check correctness of declared [hostname patterns](#host-definitions) 
 and [alias templates](#alias-templates). 
 It will print a concise list of compiled results, yet omitting linked [config properties](#config-properties). 
+
+Options for `list`
+* `--hosts-file` - input hosts file for regexp compilation (each hostname in new line)
 
 For example, let's run `list` for `./examples/readme` directory from previous paragraph:
  

@@ -16,6 +16,9 @@ var tests = []struct {
 }{
 	{"hostname_only", []string{}},
 	{"readme", []string{}},
+	{"readme_regexp", []string{
+		"--hosts-file", filepath.Join("readme_regexp", "hosts.txt"),
+	}},
 	{"regexp_hosts", []string{
 		"--hosts-file", filepath.Join("regexp_hosts", "hosts.txt"),
 	}},

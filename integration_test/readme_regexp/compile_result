@@ -1,0 +1,30 @@
+Host host1.dev
+     HostName instance1.my-service-dev.example.com
+     IdentityFile ~/.ssh/key.pem
+     User abc
+
+Host host1.test
+     HostName instance1.my-service-test.example.com
+     IdentityFile ~/.ssh/key.pem
+     User abc
+
+Host host2.test
+     HostName instance2.my-service-test.example.com
+     IdentityFile ~/.ssh/key.pem
+     User abc
+
+Host host1.prod
+     HostName instance1.my-service-prod.example.com
+     IdentityFile ~/.ssh/key.pem
+     User abc
+
+Host host2.prod
+     HostName instance2.my-service-prod.example.com
+     IdentityFile ~/.ssh/key.pem
+     User abc
+
+Host host3.prod
+     HostName instance3.my-service-prod.example.com
+     IdentityFile ~/.ssh/key.pem
+     User abc
+

@@ -1,0 +1,9 @@
+readme_regexp/config.hcl (1):
+
+ dc1-services (6):
+  host1.dev: instance1.my-service-dev.example.com
+  host1.test: instance1.my-service-test.example.com
+  host2.test: instance2.my-service-test.example.com
+  host1.prod: instance1.my-service-prod.example.com
+  host2.prod: instance2.my-service-prod.example.com
+  host3.prod: instance3.my-service-prod.example.com

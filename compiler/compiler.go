@@ -47,8 +47,12 @@ func (c *Compiler) Compile(input ExpandingHostConfig) ([]HostEntity, error) {
 	replacements := c.aliasReplacementGroups(input.AliasTemplate)
 	var results []HostEntity
 	for _, h := range expanded {
+		alias, err := c.compileToTargetHost(input.AliasTemplate, replacements, h, input.HostnamePattern)
+		if err != nil {
+			return nil, fmt.Errorf("error compiling host `%s`: %s", input.AliasName, err.Error())
+		}
 		results = append(results, HostEntity{
-			Host:     c.compileToTargetHost(input.AliasTemplate, replacements, h),
+			Host:     alias,
 			HostName: h.Hostname,
 			Config:   input.Config,
 		})
@@ -56,9 +60,13 @@ func (c *Compiler) Compile(input ExpandingHostConfig) ([]HostEntity, error) {
 	return results, nil
 }
 
-func (c *Compiler) compileToTargetHost(aliasTemplate string, replacements []templateReplacement, host expandedHostname) string {
+func (c *Compiler) compileToTargetHost(aliasTemplate string, replacements []templateReplacement, host expandedHostname, hostnamePattern string) (string, error) {
 	if len(replacements) == 0 {
-		return aliasTemplate
+		return aliasTemplate, nil
+	}
+	err := c.validateReplacements(aliasTemplate, hostnamePattern, replacements, host.Replacements)
+	if err != nil {
+		return "", err
 	}
 	alias := ""
 	for i, s := range replacements {
@@ -75,7 +83,19 @@ func (c *Compiler) compileToTargetHost(aliasTemplate string, replacements []temp
 			alias += aliasTemplate[s.endIdx:]
 		}
 	}
-	return alias
+	return alias, nil
+}
+
+func (c *Compiler) validateReplacements(aliasTemplate string, hostnamePattern string, aliasReplacements []templateReplacement, patternReplacements []string) error {
+	maxIdxAllowed := len(patternReplacements)
+	for _, replacement := range aliasReplacements {
+		replacementIdx := replacement.replacementIdx + 1
+		if replacementIdx > maxIdxAllowed {
+			return fmt.Errorf("alias `%s` contains placeholder with index `#%d` being out of bounds, `%s` allows `#%d` as the maximum index",
+				aliasTemplate, replacementIdx, hostnamePattern, maxIdxAllowed)
+		}
+	}
+	return nil
 }
 
 // CompileRegexp compiles regexp ExpandingHostConfig against provided InputHosts
@@ -94,8 +114,12 @@ func (c *Compiler) CompileRegexp(input ExpandingHostConfig, hosts InputHosts) ([
 					Hostname:     matchedHost[0],
 					Replacements: matchedHost[1:],
 				}
+				alias, err := c.compileToTargetHost(input.AliasTemplate, replacements, h, input.HostnamePattern)
+				if err != nil {
+					return nil, fmt.Errorf("error compiling regexp host `%s`: %s", input.AliasName, err.Error())
+				}
 				results = append(results, HostEntity{
-					Host:     c.compileToTargetHost(input.AliasTemplate, replacements, h),
+					Host:     alias,
 					HostName: h.Hostname,
 					Config:   input.Config,
 				})

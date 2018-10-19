@@ -173,3 +173,45 @@ func TestRegexpCompile(t *testing.T) {
 		Config:   sshConfig,
 	}}, results)
 }
+
+func TestRegexpCompileWithInvalidAlias(t *testing.T) {
+	t.Parallel()
+
+	// given
+	input := ExpandingHostConfig{
+		AliasName:       "InvalidAlias",
+		HostnamePattern: "instance(\\d+)\\.example\\.com",
+		AliasTemplate:   "host{#1}.{#2}.dc1",
+	}
+	hosts := InputHosts{
+		"instance1.example.com",
+		"instance2.example.com",
+	}
+
+	// when
+	results, err := NewCompiler().CompileRegexp(input, hosts)
+
+	// then
+	assert.Nil(t, results)
+	assert.Error(t, err)
+	assert.Equal(t, "error compiling regexp host `InvalidAlias`: alias `host{#1}.{#2}.dc1` contains placeholder with index `#2` being out of bounds, `instance(\\d+)\\.example\\.com` allows `#1` as the maximum index", err.Error())
+}
+
+func TestCompileWithInvalidAlias(t *testing.T) {
+	t.Parallel()
+
+	// given
+	input := ExpandingHostConfig{
+		AliasName:       "InvalidAlias",
+		HostnamePattern: "instance[1..2].example.com",
+		AliasTemplate:   "host{#1}.{#2}.dc1",
+	}
+
+	// when
+	results, err := NewCompiler().Compile(input)
+
+	// then
+	assert.Nil(t, results)
+	assert.Error(t, err)
+	assert.Equal(t, "error compiling host `InvalidAlias`: alias `host{#1}.{#2}.dc1` contains placeholder with index `#2` being out of bounds, `instance[1..2].example.com` allows `#1` as the maximum index", err.Error())
+}

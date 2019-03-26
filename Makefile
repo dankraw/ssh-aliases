@@ -41,7 +41,7 @@ fmt: lint-deps
 	@gofmt -l -s -w $(SRC)
 
 lint: lint-deps
-	@gometalinter.v1 --config=gometalinter.json ./...
+	@golangci-lint run
 
 lint-deps:
-	@which gometalinter.v1 > /dev/null || (go get gopkg.in/alecthomas/gometalinter.v1 && gometalinter.v1 --install)
+	@which golangci-lint > /dev/null || go get -u github.com/golangci/golangci-lint/cmd/golangci-lint

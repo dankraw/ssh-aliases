@@ -7,7 +7,6 @@ import (
 
 	"github.com/dankraw/ssh-aliases/compiler"
 	"github.com/dankraw/ssh-aliases/config"
-	"github.com/fatih/color"
 )
 
 type listCommand struct {
@@ -31,7 +30,6 @@ func (e *listCommand) execute(dir string, hosts []string) error {
 	if err != nil {
 		return err
 	}
-	white := color.New(color.FgHiWhite)
 	j := 0
 	for _, s := range ctx.Sources {
 		if len(s.Hosts) < 1 {
@@ -42,7 +40,7 @@ func (e *listCommand) execute(dir string, hosts []string) error {
 			fileDelimiter = "\n"
 		}
 		j++
-		_, err = white.Fprint(e.writer, fileDelimiter+s.SourceName)
+		_, err = fmt.Fprint(e.writer, fileDelimiter+s.SourceName)
 		if err != nil {
 			return err
 		}
@@ -52,7 +50,7 @@ func (e *listCommand) execute(dir string, hosts []string) error {
 			if err != nil {
 				return err
 			}
-			_, err = white.Fprint(e.writer, "\n "+h.AliasName)
+			_, err = fmt.Fprint(e.writer, "\n "+h.AliasName)
 			if err != nil {
 				return err
 			}

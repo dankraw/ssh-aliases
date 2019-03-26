@@ -16,7 +16,7 @@ type Compiler struct {
 func NewCompiler() *Compiler {
 	return &Compiler{
 		expander:     newExpander(),
-		groupsRegexp: regexp.MustCompile("{#(\\d+)}"),
+		groupsRegexp: regexp.MustCompile(`{#(\d+)}`),
 	}
 }
 
@@ -108,22 +108,20 @@ func (c *Compiler) CompileRegexp(input ExpandingHostConfig, hosts InputHosts) ([
 	var results []HostEntity
 	for _, host := range hosts {
 		match := re.FindAllStringSubmatch(host, -1)
-		if match != nil {
-			for _, matchedHost := range match {
-				h := expandedHostname{
-					Hostname:     matchedHost[0],
-					Replacements: matchedHost[1:],
-				}
-				alias, err := c.compileToTargetHost(input.AliasTemplate, replacements, h, input.HostnamePattern)
-				if err != nil {
-					return nil, fmt.Errorf("error compiling regexp host `%s`: %s", input.AliasName, err.Error())
-				}
-				results = append(results, HostEntity{
-					Host:     alias,
-					HostName: h.Hostname,
-					Config:   input.Config,
-				})
+		for _, matchedHost := range match {
+			h := expandedHostname{
+				Hostname:     matchedHost[0],
+				Replacements: matchedHost[1:],
 			}
+			alias, err := c.compileToTargetHost(input.AliasTemplate, replacements, h, input.HostnamePattern)
+			if err != nil {
+				return nil, fmt.Errorf("error compiling regexp host `%s`: %s", input.AliasName, err.Error())
+			}
+			results = append(results, HostEntity{
+				Host:     alias,
+				HostName: h.Hostname,
+				Config:   input.Config,
+			})
 		}
 	}
 	return results, nil

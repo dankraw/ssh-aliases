@@ -28,7 +28,7 @@ func interpolatedConfigProps(variables variablesMap, rawConfig []map[string]inte
 	return h, nil
 }
 
-var variableRegexp = regexp.MustCompile("\\${([^}]+)}")
+var variableRegexp = regexp.MustCompile(`\${([^}]+)}`)
 
 func applyVariablesToString(str string, vals variablesMap) (string, error) {
 	match := variableRegexp.FindStringSubmatchIndex(str)

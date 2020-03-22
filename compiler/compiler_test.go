@@ -77,6 +77,24 @@ func TestShouldExpandHostnameWithProvidedRange(t *testing.T) {
 	}}, results)
 }
 
+func TestShouldAllowUnderscoreInHostname(t *testing.T) {
+	t.Parallel()
+
+	// given
+	input := ExpandingHostConfig{
+		HostnamePattern: "_node1._dc.exa_mple.com_",
+		AliasTemplate:   "node1",
+	}
+
+	// when
+	results, err := NewCompiler().Compile(input)
+
+	//  then
+	assert.NoError(t, err)
+	assert.Len(t, results, 1)
+	assert.Equal(t, "node1", results[0].Host)
+}
+
 func TestShouldAllowStaticAliasDefinitions(t *testing.T) {
 	t.Parallel()
 

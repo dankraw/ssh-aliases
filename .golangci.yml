@@ -1,0 +1,72 @@
+version: 2
+
+run:
+  timeout: 10m
+  go: "1.20"
+  modules-download-mode: readonly
+
+linters:
+  enable:
+    - govet
+    - errcheck
+    - staticcheck
+    - ineffassign
+    - unused
+    - misspell
+    - gosec
+    - cyclop
+    - dupl
+    - gocritic
+    - revive
+    - unconvert
+    - goconst
+    - prealloc
+    - lll
+    - nakedret
+    - noctx
+    - paralleltest
+    - tagliatelle
+    - tparallel
+    - wastedassign
+    - whitespace
+
+linters-settings:
+  cyclop:
+    max-complexity: 15
+  dupl:
+    threshold: 100
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
+  lll:
+    line-length: 120
+  misspell:
+    locale: US
+  tagliatelle:
+    case:
+      rules:
+        json: snake
+        yaml: snake
+        xml: snake
+  whitespace:
+    multi-if: false
+    multi-func: false
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - paralleltest
+        - tparallel
+    - path: integration_test/
+      linters:
+        - cyclop
+    - path: config_test/
+      linters:
+        - cyclop
+  max-issues-per-linter: 0
+  max-same-issues: 0

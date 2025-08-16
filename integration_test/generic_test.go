@@ -29,6 +29,7 @@ func TestCompileCommandExecute(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.dir, func(t *testing.T) {
+			t.Parallel()
 			// given
 			buffer := new(bytes.Buffer)
 
@@ -55,6 +56,7 @@ func TestListCommandExecute(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.dir, func(t *testing.T) {
+			t.Parallel()
 			// given
 			buffer := new(bytes.Buffer)
 

@@ -1,3 +1,4 @@
+// Package command provides CLI command implementations for ssh-aliases
 package command
 
 import (
@@ -65,7 +66,7 @@ func configureCLI(version string, writer io.Writer) (*cli.App, error) {
 				Destination: &hostsFile,
 			},
 		},
-		Action: func(ctx *cli.Context) error {
+		Action: func(_ *cli.Context) error {
 			hosts, err := readHostsFile(hostsFile)
 			if err != nil {
 				return cli.NewExitError(err.Error(), 1)
@@ -103,7 +104,7 @@ func configureCLI(version string, writer io.Writer) (*cli.App, error) {
 				Destination: &hostsFile,
 			},
 		},
-		Action: func(ctx *cli.Context) error {
+		Action: func(_ *cli.Context) error {
 			var err error
 			hosts, err := readHostsFile(hostsFile)
 			if err != nil {

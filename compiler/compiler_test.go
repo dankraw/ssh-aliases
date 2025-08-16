@@ -212,7 +212,9 @@ func TestRegexpCompileWithInvalidAlias(t *testing.T) {
 	// then
 	assert.Nil(t, results)
 	assert.Error(t, err)
-	assert.Equal(t, "error compiling regexp host `InvalidAlias`: alias `host{#1}.{#2}.dc1` contains placeholder with index `#2` being out of bounds, `instance(\\d+)\\.example\\.com` allows `#1` as the maximum index", err.Error())
+	assert.Equal(t, "error compiling regexp host `InvalidAlias`: alias `host{#1}.{#2}.dc1` contains "+
+		"placeholder with index `#2` being out of bounds, `instance(\\d+)\\.example\\.com` allows `#1` as the maximum index",
+		err.Error())
 }
 
 func TestCompileWithInvalidAlias(t *testing.T) {
@@ -231,5 +233,7 @@ func TestCompileWithInvalidAlias(t *testing.T) {
 	// then
 	assert.Nil(t, results)
 	assert.Error(t, err)
-	assert.Equal(t, "error compiling host `InvalidAlias`: alias `host{#1}.{#2}.dc1` contains placeholder with index `#2` being out of bounds, `instance[1..2].example.com` allows `#1` as the maximum index", err.Error())
+	assert.Equal(t, "error compiling host `InvalidAlias`: alias `host{#1}.{#2}.dc1` contains "+
+		"placeholder with index `#2` being out of bounds, `instance[1..2].example.com` allows `#1` as the maximum index",
+		err.Error())
 }

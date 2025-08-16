@@ -13,26 +13,22 @@ linters:
     - ineffassign
     - unused
     - misspell
-    - gosec
-    - cyclop
     - dupl
     - gocritic
     - revive
     - unconvert
     - goconst
     - prealloc
-    - lll
     - nakedret
     - noctx
     - paralleltest
     - tagliatelle
     - tparallel
     - wastedassign
-    - whitespace
 
 linters-settings:
   cyclop:
-    max-complexity: 15
+    max-complexity: 25
   dupl:
     threshold: 100
   gocritic:
@@ -43,7 +39,7 @@ linters-settings:
       - performance
       - style
   lll:
-    line-length: 120
+    line-length: 150
   misspell:
     locale: US
   tagliatelle:

@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/pkg/errors"
 
@@ -29,7 +30,7 @@ func (e *Reader) ReadConfigs(dir string) (compiler.InputContext, error) {
 	if err != nil {
 		return compiler.InputContext{}, err
 	}
-	var sources []rawContextSource
+	var sources = make([]rawContextSource, 0, len(files))
 	for _, f := range files {
 		c, err := e.decodeFile(f)
 		if err != nil {
@@ -48,6 +49,11 @@ func (e *Reader) ReadConfigs(dir string) (compiler.InputContext, error) {
 }
 
 func (e *Reader) decodeFile(file string) (rawFileContext, error) {
+	// Basic path validation
+	if strings.Contains(file, "..") || strings.HasPrefix(file, "/") {
+		return rawFileContext{}, fmt.Errorf("invalid file path: %s", file)
+	}
+	
 	data, err := os.ReadFile(file)
 	if err != nil {
 		return rawFileContext{}, err

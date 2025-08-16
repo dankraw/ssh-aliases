@@ -18,7 +18,8 @@ func newExpander() *expander {
 	return &expander{
 		rangeRegexp:     regexp.MustCompile(`\[(\d+)\.\.(\d+)\]`),
 		variationRegexp: regexp.MustCompile(`\[([a-zA-Z0-9-|]+(?:\.[a-zA-Z0-9-|]+)*)+\]`),
-		hostnameRegexp:  regexp.MustCompile(`^([a-zA-Z0-9_]|[a-zA-Z0-9_][a-zA-Z0-9-_]{0,61}[a-zA-Z0-9_])(\.([a-zA-Z0-9_]|[a-zA-Z0-9_][a-zA-Z0-9-_]{0,61}[a-zA-Z0-9_]))*$`),
+		hostnameRegexp: regexp.MustCompile(`^([a-zA-Z0-9_]|[a-zA-Z0-9_][a-zA-Z0-9-_]{0,61}[a-zA-Z0-9_])` +
+			`(\.([a-zA-Z0-9_]|[a-zA-Z0-9_][a-zA-Z0-9-_]{0,61}[a-zA-Z0-9_]))*$`),
 	}
 }
 
@@ -48,7 +49,7 @@ func (s byIndex) Swap(i, j int) {
 }
 
 func (e *expander) expand(host string) ([]expandedHostname, error) {
-	var ranges []expandingRange
+	var ranges = make([]expandingRange, 0, len(e.rangeRegexp.FindAllStringSubmatchIndex(host, -1)))
 	n := 1
 	for _, r := range e.rangeRegexp.FindAllStringSubmatchIndex(host, -1) {
 		expRange, err := e.expandingRange(host, r)

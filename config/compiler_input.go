@@ -1,3 +1,4 @@
+// Package config provides configuration parsing and compilation input processing
 package config
 
 import (
@@ -26,7 +27,7 @@ func compilerInputContext(sources []rawContextSource) (compiler.InputContext, er
 	if err != nil {
 		return compiler.InputContext{}, err
 	}
-	var ctxSources []compiler.ContextSource
+	var ctxSources = make([]compiler.ContextSource, 0, len(sources))
 	for _, s := range sources {
 		expandingHostConfigs, err := expandingHostConfigs(s.RawContext, variables, namedProps)
 		if err != nil {
@@ -48,7 +49,8 @@ func validateHosts(sources []rawContextSource) error {
 	for _, s := range sources {
 		for _, h := range s.RawContext.Hosts {
 			if strings.TrimSpace(h.Alias) == "" && strings.TrimSpace(h.Hostname) == "" {
-				return fmt.Errorf("error in `%s`: invalid `%s` host definition: alias and hostname are both empty or undefined", s.SourceName, h.Name)
+				return fmt.Errorf("error in `%s`: invalid `%s` host definition: alias and hostname are both empty or undefined",
+					s.SourceName, h.Name)
 			}
 			if _, contains := hosts[h.Name]; contains {
 				return fmt.Errorf("duplicate host `%v`", h.Name)
@@ -67,7 +69,8 @@ func getNamedConfigProps(sources []rawContextSource, variables variablesMap) (ma
 			configToSourceMap[name] = s.SourceName
 			interpolated, err := interpolatedConfigProps(variables, r)
 			if err != nil {
-				return nil, fmt.Errorf("error in `%s`: invalid `%s` config definition: %s", s.SourceName, name, err.Error())
+				return nil, fmt.Errorf("error in `%s`: invalid `%s` config definition: %s",
+					configToSourceMap[name], name, err.Error())
 			}
 			propsMap[name] = interpolated
 		}
@@ -137,7 +140,7 @@ func expandingHostConfigs(fileCtx rawFileContext, variables variablesMap, propsM
 }
 
 func sortedCompilerProperties(props configProps) compiler.ConfigProperties {
-	var entries []compiler.ConfigProperty
+	var entries = make([]compiler.ConfigProperty, 0, len(props))
 	for k, v := range props {
 		entries = append(entries, compiler.ConfigProperty{Key: sanitize(k), Value: v})
 	}

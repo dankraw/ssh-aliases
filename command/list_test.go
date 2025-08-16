@@ -25,5 +25,4 @@ func TestListCommandExecute(t *testing.T) {
 	assert.NoError(t, err)
 	output, _ := os.ReadFile(filepath.Join(fixtureDir, "list_result"))
 	assert.Equal(t, string(output), buffer.String())
-
 }

@@ -1,3 +1,4 @@
+// Package main provides the ssh-aliases command-line interface
 package main
 
 import (

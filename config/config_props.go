@@ -95,7 +95,8 @@ func (c configProps) evaluateConfigImports(propsMap map[string]configProps, eval
 
 func importProps(importedStr string, propsMap map[string]configProps, evaluatedImports *[]string) (configProps, error) {
 	if contains(*evaluatedImports, importedStr) {
-		return nil, fmt.Errorf("circular import in configs (config imports chain: `%s` -> `%s`)", strings.Join(*evaluatedImports, " -> "), importedStr)
+		return nil, fmt.Errorf("circular import in configs (config imports chain: `%s` -> `%s`)",
+			strings.Join(*evaluatedImports, " -> "), importedStr)
 	}
 	*evaluatedImports = append(*evaluatedImports, importedStr)
 	if imported, ok := propsMap[importedStr]; ok {

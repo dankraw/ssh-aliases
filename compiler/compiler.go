@@ -1,3 +1,4 @@
+// Package compiler provides the core compilation logic for ssh-aliases
 package compiler
 
 import (
@@ -45,7 +46,7 @@ func (c *Compiler) Compile(input ExpandingHostConfig) ([]HostEntity, error) {
 		return nil, err
 	}
 	replacements := c.aliasReplacementGroups(input.AliasTemplate)
-	var results []HostEntity
+	var results = make([]HostEntity, 0, len(expanded))
 	for _, h := range expanded {
 		alias, err := c.compileToTargetHost(input.AliasTemplate, replacements, h, input.HostnamePattern)
 		if err != nil {
@@ -60,7 +61,8 @@ func (c *Compiler) Compile(input ExpandingHostConfig) ([]HostEntity, error) {
 	return results, nil
 }
 
-func (c *Compiler) compileToTargetHost(aliasTemplate string, replacements []templateReplacement, host expandedHostname, hostnamePattern string) (string, error) {
+func (c *Compiler) compileToTargetHost(aliasTemplate string, replacements []templateReplacement,
+	host expandedHostname, hostnamePattern string) (string, error) {
 	if len(replacements) == 0 {
 		return aliasTemplate, nil
 	}
@@ -86,12 +88,14 @@ func (c *Compiler) compileToTargetHost(aliasTemplate string, replacements []temp
 	return alias, nil
 }
 
-func (c *Compiler) validateReplacements(aliasTemplate string, hostnamePattern string, aliasReplacements []templateReplacement, patternReplacements []string) error {
+func (c *Compiler) validateReplacements(aliasTemplate string, hostnamePattern string,
+	aliasReplacements []templateReplacement, patternReplacements []string) error {
 	maxIdxAllowed := len(patternReplacements)
 	for _, replacement := range aliasReplacements {
 		replacementIdx := replacement.replacementIdx + 1
 		if replacementIdx > maxIdxAllowed {
-			return fmt.Errorf("alias `%s` contains placeholder with index `#%d` being out of bounds, `%s` allows `#%d` as the maximum index",
+			return fmt.Errorf("alias `%s` contains placeholder with index `#%d` being out of bounds, "+
+				"`%s` allows `#%d` as the maximum index",
 				aliasTemplate, replacementIdx, hostnamePattern, maxIdxAllowed)
 		}
 	}
@@ -129,7 +133,7 @@ func (c *Compiler) CompileRegexp(input ExpandingHostConfig, hosts InputHosts) ([
 
 func (c *Compiler) aliasReplacementGroups(aliasTemplate string) []templateReplacement {
 	templateGroups := c.groupsRegexp.FindAllStringSubmatchIndex(aliasTemplate, -1)
-	var replacements []templateReplacement
+	var replacements = make([]templateReplacement, 0, len(templateGroups))
 	for _, group := range templateGroups {
 		hostnameGroupSelect, _ := strconv.Atoi(aliasTemplate[group[2]:group[3]])
 		replacements = append(replacements, templateReplacement{group[0], group[1], hostnameGroupSelect - 1})

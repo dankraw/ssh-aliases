@@ -22,7 +22,7 @@ jobs:
       - name: Install golangci-lint
         uses: golangci/golangci-lint-action@v4
         with:
-          version: latest
+          version: v1.58.0
           args: --timeout=10m
 
       - name: Check formatting

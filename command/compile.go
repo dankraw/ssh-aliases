@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
-
 	"os"
 
 	"github.com/dankraw/ssh-aliases/compiler"
@@ -42,7 +40,7 @@ func (c *compileSaveCommand) execute(dir string, force bool, hosts []string) err
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(c.file, buffer.Bytes(), 0600)
+	return os.WriteFile(c.file, buffer.Bytes(), 0600)
 }
 
 type compileCommand struct {
@@ -83,7 +81,10 @@ func (c *compileCommand) execute(dir string, hosts []string) error {
 		return err
 	}
 	for _, result := range allResults {
-		c.printHostConfig(result)
+		err = c.printHostConfig(result)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -96,17 +97,28 @@ func (c *compileCommand) compileHost(host compiler.ExpandingHostConfig, hosts []
 	return c.compiler.Compile(host)
 }
 
-func (c *compileCommand) printHostConfig(config compiler.HostEntity) {
-	fmt.Fprintf(c.writer, "Host %v\n", config.Host)
+func (c *compileCommand) printHostConfig(config compiler.HostEntity) error {
+	_, err := fmt.Fprintf(c.writer, "Host %v\n", config.Host)
+	if err != nil {
+		return err
+	}
 	if config.HostName != "" {
-		c.printHostConfigProperty("HostName", config.HostName)
+		err = c.printHostConfigProperty("HostName", config.HostName)
+		if err != nil {
+			return err
+		}
 	}
 	for _, e := range config.Config {
-		c.printHostConfigProperty(e.Key, e.Value)
+		err = c.printHostConfigProperty(e.Key, e.Value)
+		if err != nil {
+			return err
+		}
 	}
-	fmt.Fprintln(c.writer)
+	_, err = fmt.Fprintln(c.writer)
+	return err
 }
 
-func (c *compileCommand) printHostConfigProperty(keyword string, value interface{}) {
-	fmt.Fprintf(c.writer, "     %s %v\n", keyword, value)
+func (c *compileCommand) printHostConfigProperty(keyword string, value interface{}) error {
+	_, err := fmt.Fprintf(c.writer, "     %s %v\n", keyword, value)
+	return err
 }

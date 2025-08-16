@@ -1,12 +1,10 @@
 package command
 
 import (
-	"testing"
-
 	"bytes"
-
-	"io/ioutil"
+	"os"
 	"path/filepath"
+	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -25,7 +23,7 @@ func TestListCommandExecute(t *testing.T) {
 
 	// then
 	assert.NoError(t, err)
-	output, _ := ioutil.ReadFile(filepath.Join(fixtureDir, "list_result"))
+	output, _ := os.ReadFile(filepath.Join(fixtureDir, "list_result"))
 	assert.Equal(t, string(output), buffer.String())
 
 }

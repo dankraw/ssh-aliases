@@ -2,7 +2,7 @@ package config
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	"github.com/pkg/errors"
 
@@ -48,7 +48,7 @@ func (e *Reader) ReadConfigs(dir string) (compiler.InputContext, error) {
 }
 
 func (e *Reader) decodeFile(file string) (rawFileContext, error) {
-	data, err := ioutil.ReadFile(file)
+	data, err := os.ReadFile(file)
 	if err != nil {
 		return rawFileContext{}, err
 	}

@@ -44,7 +44,10 @@ func (e *listCommand) execute(dir string, hosts []string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Fprintf(e.writer, " (%d):\n", len(s.Hosts))
+		_, err = fmt.Fprintf(e.writer, " (%d):\n", len(s.Hosts))
+		if err != nil {
+			return err
+		}
 		for _, h := range s.Hosts {
 			results, err := e.compileHost(h, hosts)
 			if err != nil {
@@ -54,12 +57,21 @@ func (e *listCommand) execute(dir string, hosts []string) error {
 			if err != nil {
 				return err
 			}
-			fmt.Fprintf(e.writer, " (%d):\n", len(results))
+			_, err = fmt.Fprintf(e.writer, " (%d):\n", len(results))
+			if err != nil {
+				return err
+			}
 			for _, r := range results {
 				if r.HostName != "" {
-					fmt.Fprintf(e.writer, "  %v: %v\n", r.Host, r.HostName)
+					_, err = fmt.Fprintf(e.writer, "  %v: %v\n", r.Host, r.HostName)
+					if err != nil {
+						return err
+					}
 				} else {
-					fmt.Fprintf(e.writer, "  %v\n", r.Host)
+					_, err = fmt.Fprintf(e.writer, "  %v\n", r.Host)
+					if err != nil {
+						return err
+					}
 				}
 			}
 		}

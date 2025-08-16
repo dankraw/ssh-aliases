@@ -2,7 +2,7 @@ package config
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -19,7 +19,7 @@ const hclExtension = ".hcl"
 
 // ScanDirectory returns an array of file names that contain ssh-aliases configs
 func (s *Scanner) ScanDirectory(path string) ([]string, error) {
-	files, err := ioutil.ReadDir(path)
+	files, err := os.ReadDir(path)
 	if err != nil {
 		return nil, fmt.Errorf("error while scanning `%s`: %s", path, err.Error())
 	}

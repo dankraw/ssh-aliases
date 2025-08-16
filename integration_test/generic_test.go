@@ -2,7 +2,7 @@ package examples
 
 import (
 	"bytes"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -44,7 +44,7 @@ func TestCompileCommandExecute(t *testing.T) {
 
 			// then
 			assert.NoError(t, err)
-			output, _ := ioutil.ReadFile(filepath.Join(test.dir, "compile_result"))
+			output, _ := os.ReadFile(filepath.Join(test.dir, "compile_result"))
 			assert.Equal(t, string(output), buffer.String())
 		})
 	}
@@ -70,7 +70,7 @@ func TestListCommandExecute(t *testing.T) {
 
 			// then
 			assert.NoError(t, err)
-			output, _ := ioutil.ReadFile(filepath.Join(test.dir, "list_result"))
+			output, _ := os.ReadFile(filepath.Join(test.dir, "list_result"))
 			assert.Equal(t, string(output), buffer.String())
 		})
 	}

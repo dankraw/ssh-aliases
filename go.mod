@@ -1,12 +1,13 @@
 module github.com/dankraw/ssh-aliases
 
-go 1.20
+go 1.23.0
 
 require (
 	github.com/hashicorp/hcl v1.0.0
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli v1.22.17
+	golang.org/x/text v0.28.0
 )
 
 require (

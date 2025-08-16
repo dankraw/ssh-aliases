@@ -27,27 +27,34 @@ func TestShouldReadCompleteConfigFromDir(t *testing.T) {
 					AliasName:       "service-a",
 					HostnamePattern: "service-a[1..5].my.domain1.example.com",
 					AliasTemplate:   "a{#1}",
-					Config: compiler.ConfigProperties{{
-						Key:   "IdentityFile",
-						Value: "a_1001_id_secret_rsa.pem",
-					}, {
-						Key:   "Port",
-						Value: 22,
-					}, {
-						Key:   "User",
-						Value: "deployment",
-					}},
+					Config: compiler.ConfigProperties{
+						compiler.ConfigProperty{
+							Key:   "IdentityFile",
+							Value: "a_1001_id_secret_rsa.pem",
+						}, 
+						compiler.ConfigProperty{
+							Key:   "Port",
+							Value: 22,
+						}, 
+						compiler.ConfigProperty{
+							Key:   "User",
+							Value: "deployment",
+						},
+					},
 				}, {
 					AliasName:       "service-b",
 					HostnamePattern: "service-b[1..2].example.com",
 					AliasTemplate:   "b{#1}",
-					Config: compiler.ConfigProperties{{
-						Key:   "IdentityFile",
-						Value: "b_id_1001_rsa.pem",
-					}, {
-						Key:   "Port",
-						Value: 22,
-					}},
+					Config: compiler.ConfigProperties{
+						compiler.ConfigProperty{
+							Key:   "IdentityFile",
+							Value: "b_id_1001_rsa.pem",
+						}, 
+						compiler.ConfigProperty{
+							Key:   "Port",
+							Value: 22,
+						},
+					},
 				}},
 			}, {
 				SourceName: "test_fixtures/valid/basic_with_variables/variables.hcl",
@@ -76,33 +83,42 @@ func TestShouldReadFilesWithImportedConfigs(t *testing.T) {
 					AliasName:       "abc",
 					HostnamePattern: "servcice-abc.example.com",
 					AliasTemplate:   "abc",
-					Config: compiler.ConfigProperties{{
-						Key:   "Additional",
-						Value: "extension",
-					}, {
-						Key:   "Another",
-						Value: "one",
-					}, {
-						Key:   "X",
-						Value: "y",
-					}},
+					Config: compiler.ConfigProperties{
+						compiler.ConfigProperty{
+							Key:   "Additional",
+							Value: "extension",
+						}, 
+						compiler.ConfigProperty{
+							Key:   "Another",
+							Value: "one",
+						}, 
+						compiler.ConfigProperty{
+							Key:   "X",
+							Value: "y",
+						},
+					},
 				}, {
 					AliasName:       "def",
 					HostnamePattern: "servcice-def.example.com",
 					AliasTemplate:   "def",
-					Config: compiler.ConfigProperties{{
-						Key:   "Additional",
-						Value: "extension 2",
-					}, {
-						Key:   "Another",
-						Value: "two",
-					}, {
-						Key:   "SomeProp",
-						Value: 123,
-					}, {
-						Key:   "This",
-						Value: "never happens",
-					}},
+					Config: compiler.ConfigProperties{
+						compiler.ConfigProperty{
+							Key:   "Additional",
+							Value: "extension 2",
+						}, 
+						compiler.ConfigProperty{
+							Key:   "Another",
+							Value: "two",
+						}, 
+						compiler.ConfigProperty{
+							Key:   "SomeProp",
+							Value: 123,
+						}, 
+						compiler.ConfigProperty{
+							Key:   "This",
+							Value: "never happens",
+						},
+					},
 				}},
 			},
 		},
@@ -127,17 +143,21 @@ func TestShouldReadHostDefinitionsWithoutHostnames(t *testing.T) {
 				Hosts: []compiler.ExpandingHostConfig{{
 					AliasName:     "all",
 					AliasTemplate: "*",
-					Config: compiler.ConfigProperties{{
-						Key:   "A",
-						Value: 1,
-					}},
+					Config: compiler.ConfigProperties{
+						compiler.ConfigProperty{
+							Key:   "A",
+							Value: 1,
+						},
+					},
 				}, {
 					AliasName:       "prod",
 					HostnamePattern: "prod*",
-					Config: compiler.ConfigProperties{{
-						Key:   "A",
-						Value: 2,
-					}},
+					Config: compiler.ConfigProperties{
+						compiler.ConfigProperty{
+							Key:   "A",
+							Value: 2,
+						},
+					},
 				}},
 			},
 		},

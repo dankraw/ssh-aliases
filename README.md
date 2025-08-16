@@ -1,5 +1,4 @@
 # ssh-aliases
-[![Build Status](https://travis-ci.org/dankraw/ssh-aliases.svg?branch=master)](https://travis-ci.org/dankraw/ssh-aliases) 
 [![Go Report Card](https://goreportcard.com/badge/github.com/dankraw/ssh-aliases)](https://goreportcard.com/report/github.com/dankraw/ssh-aliases)
 
 `ssh-aliases` is a command line tool that brings ease to living with `~/.ssh/config`.

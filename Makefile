@@ -1,14 +1,14 @@
 APP_NAME := ssh-aliases
 APP_VERSION := $(shell cat VERSION)
 
-PACKAGES := $(shell go list ./... | grep -v /vendor/)
+PACKAGES := $(shell go list ./...)
 BUILD_FOLDER := target
 DIST_FOLDER := dist
 
 GIT_DESC := $(shell git describe)
 GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 
-SRC := $(shell find . -type f -name '*.go' -not -path "./vendor/*")
+SRC := $(shell find . -type f -name '*.go')
 
 .PHONY: all version fmt clean test build release lint lint-deps
 
@@ -36,12 +36,10 @@ build:
 release: clean lint build
 	@bash ./package.sh $(APP_VERSION)
 
-fmt: lint-deps
+fmt:
 	@goimports -w $(SRC)
 	@gofmt -l -s -w $(SRC)
 
-lint: lint-deps
+lint:
 	@golangci-lint run
 
-lint-deps:
-	@which golangci-lint > /dev/null || go get -u github.com/golangci/golangci-lint/cmd/golangci-lint

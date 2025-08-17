@@ -40,7 +40,7 @@ func (c *compileSaveCommand) execute(dir string, force bool, hosts []string) err
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(c.file, buffer.Bytes(), 0600)
+	return os.WriteFile(c.file, buffer.Bytes(), 0o600)
 }
 
 type compileCommand struct {
@@ -97,18 +97,18 @@ func (c *compileCommand) compileHost(host compiler.ExpandingHostConfig, hosts []
 	return c.compiler.Compile(host)
 }
 
-func (c *compileCommand) printHostConfig(config compiler.HostEntity) error {
-	_, err := fmt.Fprintf(c.writer, "Host %v\n", config.Host)
+func (c *compileCommand) printHostConfig(cfg compiler.HostEntity) error {
+	_, err := fmt.Fprintf(c.writer, "Host %v\n", cfg.Host)
 	if err != nil {
 		return err
 	}
-	if config.HostName != "" {
-		err = c.printHostConfigProperty("HostName", config.HostName)
+	if cfg.HostName != "" {
+		err = c.printHostConfigProperty("HostName", cfg.HostName)
 		if err != nil {
 			return err
 		}
 	}
-	for _, e := range config.Config {
+	for _, e := range cfg.Config {
 		err = c.printHostConfigProperty(e.Key, e.Value)
 		if err != nil {
 			return err

@@ -1,6 +1,6 @@
 module github.com/dankraw/ssh-aliases
 
-go 1.25
+go 1.24
 
 require (
 	github.com/hashicorp/hcl v1.0.0
